@@ -1,9 +1,5 @@
 # 项目配置与 PWA 初始化
 
-## 状态
-
-Pending approval
-
 ## 目标
 
 初始化 `github.com/42signal/devtools` 仓库，建立可持续开发的纯 Web/PWA 项目骨架。
