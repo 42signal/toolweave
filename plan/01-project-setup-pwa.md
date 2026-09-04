@@ -13,7 +13,7 @@
 - Vite
 - React
 - TypeScript
-- Tailwind CSS
+- UnoCSS
 - Zustand
 - Dexie.js
 - vite-plugin-pwa
@@ -60,8 +60,16 @@ pnpm add zustand dexie zod
 开发依赖：
 
 ```bash
-pnpm add -D tailwindcss postcss autoprefixer vite-plugin-pwa vitest @testing-library/react @testing-library/jest-dom jsdom playwright eslint prettier
+pnpm add -D unocss vite-plugin-pwa vitest @testing-library/react @testing-library/jest-dom jsdom playwright eslint prettier
 ```
+
+样式配置：
+
+- 使用 `unocss/vite` 集成 Vite，在 `uno.config.ts` 中配置 `presetWind3()`。
+- 在应用入口引入 `virtual:uno.css`。
+- 保留 CSS Variables 用于运行时主题定制。
+- 不再直接安装 Tailwind CSS、PostCSS 和 Autoprefixer；UnoCSS 使用 Vite 插件接入。
+- 验证基础原子类、响应式样式在开发和生产构建中均生效。
 
 ### 3. 配置 PWA
 
