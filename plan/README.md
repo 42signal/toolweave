@@ -24,10 +24,10 @@
 
 阶段列表：
 
-1. `01-project-setup-pwa.md`
-2. `02-ts-plugin-runtime.md`
-3. `03-standalone-tool-runner.md`
-4. `04-sequential-flow-runner.md`
-5. `05-drag-flow-builder.md`
-6. `06-ai-ts-plugin-builder.md`
-7. `07-custom-theme.md`
+- `01-project-setup-pwa.md`
+- `02-ts-plugin-runtime.md`
+- `03-standalone-tool-runner.md`
+- `04-sequential-flow-runner.md`
+- `05-drag-flow-builder.md`
+- `06-ai-ts-plugin-builder.md`
+- `07-custom-theme.md`

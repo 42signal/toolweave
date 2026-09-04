@@ -1,4 +1,4 @@
-# 06. AI 构建 TypeScript 插件
+# AI 构建 TypeScript 插件
 
 ## 状态
 
