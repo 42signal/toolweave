@@ -6,7 +6,7 @@ Pending approval
 
 ## 目标
 
-初始化 `github.com/42pulse/devtool` 仓库，建立可持续开发的纯 Web/PWA 项目骨架。
+初始化 `github.com/42signal/devtools` 仓库，建立可持续开发的纯 Web/PWA 项目骨架。
 
 本阶段只完成基础工程能力，不实现完整插件运行时。
 
@@ -44,7 +44,7 @@ Pending approval
 仓库目标：
 
 ```txt
-github.com/42pulse/devtool
+github.com/42signal/devtools
 ```
 
 初始化方式：
@@ -83,45 +83,62 @@ vite-plugin-pwa
 - 支持离线打开基础页面
 - 不在首屏缓存 esbuild-wasm
 
-### 4. 建立目录结构
+### 4. 按需建立目录结构
+
+第一阶段不一次性创建所有未来目录，只创建当前阶段会被真实引用的目录和少量稳定基础目录。
+
+当前阶段必须创建：
 
 ```txt
 src/
   app/
     App.tsx
-    routes.tsx
 
   components/
     Button.tsx
-    Textarea.tsx
-    Card.tsx
-
-  core/
-    plugin/
-    plugin-sdk/
-    compiler/
-    tool/
-    flow/
-    storage/
-    permissions/
-    theme/
 
   features/
     home/
-    tools/
-    flows/
-    plugins/
-    ai/
-    settings/
-
-  builtins/
-    dev-basic/
-
-  workers/
+      HomePage.tsx
 
   main.tsx
   index.css
+  test-setup.ts
+
+public/
+  icons/
+  manifest.webmanifest
+
+tests/
+  e2e/
 ```
+
+当前阶段暂不创建，等对应阶段实现时再添加：
+
+```txt
+src/core/plugin/
+src/core/plugin-sdk/
+src/core/compiler/
+src/core/tool/
+src/core/flow/
+src/core/storage/
+src/core/permissions/
+src/core/theme/
+src/features/tools/
+src/features/flows/
+src/features/plugins/
+src/features/ai/
+src/features/settings/
+src/builtins/dev-basic/
+src/workers/
+```
+
+原则：
+
+- 目录服务于当前代码，不提前堆空目录。
+- 后续阶段按需创建对应目录。
+- 如果某个目录只是为了表达架构，不在代码中引用，则先写在计划里，不落到仓库中。
+- 保持首阶段骨架轻量。
 
 ### 5. 配置脚本
 
