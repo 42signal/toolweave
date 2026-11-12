@@ -1,0 +1,50 @@
+{
+  "name": "developer-toolbox",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "engines": {
+    "node": ">=26.13.0 <27",
+    "pnpm": "12.3.4"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "format:check": "prettier --check package.json tsconfig.json '*.config.*' src tests index.html README.md .github",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "build": "pnpm typecheck && vite build",
+    "e2e": "pnpm build && playwright test",
+    "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test:coverage && pnpm e2e --project=chromium",
+    "verify:release": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test:coverage && pnpm e2e"
+  },
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.65.0",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@types/node": "26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.3.0",
+    "@vitest/coverage-v8": "4.1.12",
+    "@vitest/eslint-plugin": "1.6.28",
+    "eslint": "10.14.0",
+    "eslint-plugin-playwright": "2.12.2",
+    "globals": "17.14.0",
+    "jsdom": "31.0.0",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.2",
+    "vite": "8.3.8",
+    "vitest": "4.1.12"
+  }
+}
