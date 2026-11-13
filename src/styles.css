@@ -115,10 +115,76 @@ h2 {
   line-height: 1.5;
 }
 
+.tool-workspace {
+  padding: 1.5rem;
+  min-width: 0;
+}
+
+.tool-switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tool-switcher button[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--accent-surface);
+  border-color: var(--accent);
+}
+
+.tool-heading,
+.tool-toolbar,
+.run-actions,
+.indent-control,
+.editor-label,
+.result-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tool-heading {
+  margin-bottom: 1.5rem;
+}
+
+.tool-id {
+  margin: 0 0 0.5rem;
+  color: var(--accent);
+  font-size: 0.6875rem;
+}
+
 h3 {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 500;
+}
+
+.execution-location,
+.tool-note,
+.result-bar {
+  color: var(--muted);
+  font-size: 0.6875rem;
+  line-height: 1.75;
+}
+
+.tool-note {
+  margin: -0.5rem 0 1rem;
+}
+
+.tool-toolbar {
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.run-actions {
+  margin-inline-start: auto;
+}
+
+.indent-control {
+  justify-content: flex-start;
+  font-size: 0.75rem;
 }
 
 button,
@@ -154,9 +220,79 @@ textarea:disabled {
   cursor: not-allowed;
 }
 
+.run-button {
+  min-width: 6rem;
+  color: var(--background);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.run-button:hover:not(:disabled) {
+  background: var(--foreground);
+}
+
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
+}
+
+.editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  border: 1px solid var(--border);
+}
+
+.editor-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.editor-pane + .editor-pane {
+  border-left: 1px solid var(--border);
+}
+
+.editor-label {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+}
+
+textarea {
+  width: 100%;
+  min-height: clamp(20rem, 48svh, 38rem);
+  padding: 1rem;
+  resize: vertical;
+  border: 0;
+  font-size: 0.8125rem;
+  line-height: 1.8;
+  tab-size: 2;
+}
+
+textarea:focus-visible {
+  outline-offset: -2px;
+}
+
+textarea::placeholder {
+  color: var(--muted);
+}
+
+.result-bar {
+  flex-wrap: wrap;
+  padding-block: 0.875rem;
+}
+
+.result-bar p {
+  margin: 0;
+}
+
+.tool-error {
+  margin: 0;
+  padding: 0.875rem 1rem;
+  color: var(--error);
+  border: 1px solid currentColor;
+  font-size: 0.75rem;
+  line-height: 1.8;
 }
 
 @media (max-width: 40rem) {
@@ -170,5 +306,47 @@ textarea:disabled {
 
   main {
     margin-block: 0.75rem;
+  }
+
+  .tool-workspace {
+    padding: 1rem;
+  }
+
+  .tool-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .editor-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .editor-pane + .editor-pane {
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  textarea {
+    min-height: 15rem;
+    font-size: 1rem;
+  }
+
+  .run-actions {
+    gap: 0.5rem;
+  }
+
+  .tool-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .indent-control {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-width: 100%;
+  }
+
+  .run-button {
+    min-width: 4.5rem;
   }
 }

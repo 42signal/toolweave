@@ -49,7 +49,22 @@ for (const scenario of [
       await expect(
         page.getByRole("main", { name: scenario.workspace }),
       ).toBeVisible();
-
+      await expect(
+        page.getByRole("heading", { name: scenario.title }),
+      ).toBeVisible();
+      await page.getByLabel(scenario.input).fill('{"x":1}');
+      await page
+        .getByRole("button", { name: scenario.run, exact: true })
+        .click();
+      await expect(page.getByLabel(scenario.output)).toHaveValue(
+        '{\n  "x": 1\n}',
+      );
+      await page.getByLabel(scenario.input).fill("{");
+      await page
+        .getByRole("button", { name: scenario.run, exact: true })
+        .click();
+      await expect(page.getByRole("alert")).toContainText(scenario.error);
+      await expect(page.getByRole("alert")).not.toContainText("INVALID_INPUT");
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth),
       ).toBe(375);
@@ -67,7 +82,12 @@ test.describe("languagechange", () => {
     page,
   }) => {
     await page.goto("/");
-
+    await page.getByLabel("Input JSON").fill('{"x":1}');
+    await page.getByLabel("Indent").selectOption("4");
+    await page.getByRole("button", { name: "Run", exact: true }).click();
+    await expect(page.getByLabel("Output JSON")).toHaveValue(
+      '{\n    "x": 1\n}',
+    );
     await page.evaluate(() => {
       Object.defineProperty(navigator, "languages", {
         configurable: true,
@@ -76,7 +96,13 @@ test.describe("languagechange", () => {
       window.dispatchEvent(new Event("languagechange"));
     });
     await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
-
+    await expect(page.getByLabel("输入 JSON")).toHaveValue('{"x":1}');
+    await expect(page.getByLabel("输出 JSON")).toHaveValue('{\n    "x": 1\n}');
+    await expect(page.getByLabel("缩进")).toHaveValue("4");
+    await expect(page.getByRole("status")).toContainText("完成");
+    await page.getByLabel("输入 JSON").fill("{");
+    await page.getByRole("button", { name: "运行", exact: true }).click();
+    await expect(page.getByRole("alert")).toContainText("请输入有效的 JSON");
     await page.evaluate(() => {
       Object.defineProperty(navigator, "languages", {
         configurable: true,
@@ -85,6 +111,8 @@ test.describe("languagechange", () => {
       window.dispatchEvent(new Event("languagechange"));
     });
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.getByRole("alert")).toContainText("Enter valid JSON");
+    await expect(page.getByLabel("Input JSON")).toHaveValue("{");
   });
 
   test("[I18N-E03] 右上角手动选择与浏览器跟随不丢状态，刷新恢复自动", async ({
@@ -100,12 +128,19 @@ test.describe("languagechange", () => {
     await expect(
       header.getByRole("combobox", { name: "Language" }),
     ).toBeFocused();
-
+    await page.getByLabel("Input JSON").fill('{"x":1}');
+    await page.getByLabel("Indent").selectOption("4");
+    await page.getByRole("button", { name: "Run", exact: true }).click();
+    await expect(page.getByLabel("Output JSON")).toHaveValue(
+      '{\n    "x": 1\n}',
+    );
     await header
       .getByRole("combobox", { name: "Language" })
       .selectOption("zh-CN");
     await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
-
+    await expect(page.getByLabel("输入 JSON")).toHaveValue('{"x":1}');
+    await expect(page.getByLabel("输出 JSON")).toHaveValue('{\n    "x": 1\n}');
+    await expect(page.getByLabel("缩进")).toHaveValue("4");
     await page.evaluate(() => {
       Object.defineProperty(navigator, "languages", {
         configurable: true,
@@ -119,11 +154,22 @@ test.describe("languagechange", () => {
     );
     await header.getByRole("combobox", { name: "语言" }).selectOption("auto");
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
-
+    await expect(page.getByLabel("Output JSON")).toHaveValue(
+      '{\n    "x": 1\n}',
+    );
+    await page.getByLabel("Input JSON").fill("{");
+    await page.getByRole("button", { name: "Run", exact: true }).click();
+    await expect(page.getByRole("alert")).toHaveText(
+      "Enter valid JSON or YAML. Check the syntax and selected input format.",
+    );
+    await expect(page.getByRole("alert")).not.toContainText("INVALID_INPUT");
     await header
       .getByRole("combobox", { name: "Language" })
       .selectOption("zh-CN");
-
+    await expect(page.getByRole("alert")).toHaveText(
+      "请输入有效的 JSON 或 YAML，请检查格式及所选输入类型。",
+    );
+    await expect(page.getByRole("alert")).not.toContainText("INVALID_INPUT");
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBe(375);

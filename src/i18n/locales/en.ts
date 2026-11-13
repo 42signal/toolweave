@@ -9,7 +9,18 @@ export const en = {
     tools_one: "{{count}} tool",
     tools_other: "{{count}} tools",
   },
-  tools: {},
+  tools: {
+    format: {
+      name: "Format",
+      description: "Format and convert JSON and YAML.",
+      input: "Input JSON / YAML",
+      output: "Output JSON",
+      placeholder: '{ "hello": "world" }',
+      invalidInput:
+        "Enter valid JSON or YAML. Check the syntax and selected input format.",
+      invalidConfig: "Choose JSON or YAML and an indent from 0 to 8.",
+    },
+  },
   formats: {
     auto: "Auto",
     seconds: "Seconds (s)",

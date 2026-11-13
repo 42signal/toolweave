@@ -11,7 +11,17 @@ export const zhCN: Translations = {
     tools_one: "{{count}} 个工具",
     tools_other: "{{count}} 个工具",
   },
-  tools: {},
+  tools: {
+    format: {
+      name: "格式化",
+      description: "格式化并转换 JSON 与 YAML。",
+      input: "输入 JSON / YAML",
+      output: "输出 JSON",
+      placeholder: '{ "hello": "world" }',
+      invalidInput: "请输入有效的 JSON 或 YAML，请检查格式及所选输入类型。",
+      invalidConfig: "请选择 JSON 或 YAML，以及 0–8 的缩进。",
+    },
+  },
   formats: {
     auto: "自动识别",
     seconds: "秒 (s)",

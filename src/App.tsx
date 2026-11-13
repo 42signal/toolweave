@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
+import { ToolWorkspace } from "./ToolWorkspace";
 import "./i18n";
 import { useBrowserLanguage } from "./i18n/use-browser-language";
+import { builtinTools } from "./tools/catalog";
 
 export function App() {
   const { t } = useTranslation();
@@ -40,9 +42,10 @@ export function App() {
         <div className="workspace-header">
           <h2 id="workspace-heading">{t("workspace.title")}</h2>
           <span className="tool-count">
-            {t("workspace.tools", { count: 0 })}
+            {t("workspace.tools", { count: builtinTools.length })}
           </span>
         </div>
+        <ToolWorkspace />
       </main>
     </div>
   );

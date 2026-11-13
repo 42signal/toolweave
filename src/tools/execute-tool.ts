@@ -1,0 +1,68 @@
+import { format } from "./format";
+import { isRecord } from "./protocol";
+import type { ToolResult } from "./protocol";
+
+const textTools: Record<string, (input: string) => string> = {};
+
+export function executeTool(request: unknown): ToolResult {
+  if (
+    !isRecord(request) ||
+    typeof request.toolId !== "string" ||
+    typeof request.input !== "string"
+  ) {
+    return {
+      ok: false,
+      error: { code: "EXECUTION_FAILED", message: "Invalid tool request" },
+      durationMs: 0,
+    };
+  }
+
+  const tool = request.toolId === "format" ? format : null;
+  if (!tool && !Object.hasOwn(textTools, request.toolId)) {
+    return {
+      ok: false,
+      error: { code: "UNKNOWN_TOOL", message: "Tool not found" },
+      durationMs: 0,
+    };
+  }
+
+  const startedAt = performance.now();
+  try {
+    if (tool)
+      return {
+        ...tool.run(request.input, request.config),
+        durationMs: performance.now() - startedAt,
+      };
+    if (!isRecord(request.config) || Object.keys(request.config).length !== 0)
+      return {
+        ok: false,
+        error: {
+          code: "INVALID_CONFIG",
+          message: "This tool accepts no options",
+        },
+        durationMs: performance.now() - startedAt,
+      };
+    const run = textTools[request.toolId];
+    if (!run) throw new Error("Missing builtin implementation");
+    return {
+      ok: true,
+      output: run(request.input),
+      durationMs: performance.now() - startedAt,
+    };
+  } catch (error) {
+    const invalid =
+      error instanceof TypeError ||
+      error instanceof SyntaxError ||
+      error instanceof URIError;
+    return {
+      ok: false,
+      error: {
+        code: invalid ? "INVALID_INPUT" : "EXECUTION_FAILED",
+        message: invalid
+          ? "Invalid input for selected tool"
+          : "Local tool execution failed",
+      },
+      durationMs: performance.now() - startedAt,
+    };
+  }
+}
