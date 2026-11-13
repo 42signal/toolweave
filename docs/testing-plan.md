@@ -1,0 +1,189 @@
+# 测试与 Agent 自验证
+
+本文件统一测试范围、执行流程、命令和 CI；[实施计划](implementation-plan.md)维护 PR 与用例的对应关系，[统一协议](contracts.md)维护行为与待确认决策。**PR-01 已建立脚本、App smoke 和 E-00；其余矩阵仍是待实现计划。** 实际结果见 [PR-01 报告](verification/pr-01.md)。
+
+## Agent 开发与交付流程
+
+1. **确认**：读取本工作包和协议，检查现有覆盖；新增/调整正式测试先说明边界、原因和用例 ID，取得明确授权。可一次授权整包，包内参数化和验证由 agent 自行推进；新增边界或改预期再确认。
+2. **Red → Green**：一次一个可观察行为，先证明因缺行为而失败，再最小实现并重跑。新需求遵循先写并 commit 测试的仓库要求；commit 仍须明确授权，缺授权就停下确认，不自行提交或绕过顺序。
+3. **回归**：定向测试通过后跑 `verify`；协议/Worker/存储/PWA/沙箱或发布候选跑全浏览器。失败先查报告和 trace，修根因再跑原命令，不通过放宽断言、跳过或反复重试凑绿。
+4. **交付停止**：报告工作包、工作区版本/环境、用例/文件、Red/Green 命令与退出码、通过/失败数量、coverage、报告/trace/截图路径、未验证项和风险。到约定 review 点即停，不自动进入下一包、提交、push 或发布。
+
+缺设备/浏览器/授权必须报告阻塞；“没跑”不是“通过”。文档 review 不是测试实现或 commit 授权。每个功能包同步增加测试，PR-17 仅补全链路。AI 生成的测试是产品数据，不是本仓库回归，也不是独立正确性证明。
+
+## 1. 测试层与替身
+
+| 层 | 环境 | 验证范围 |
+| --- | --- | --- |
+| Unit | Vitest / Node | 协议、注册表、自有转换、工作流规则 |
+| Component | Vitest + Testing Library / jsdom | 表单、状态、确认、键盘交互，不证明布局或 PWA |
+| 存储 Integration | Vitest + fake-indexeddb | Repository、事务、迁移；不代替真实浏览器 |
+| Browser / E2E | Playwright / 生产构建 | 真实 Worker、IndexedDB、QuickJS-WASM、SW 和 UI 闭环 |
+
+- 通过公共入口测行为，不测私有状态/内部调用次数；复用已有覆盖。
+- 只替换系统边界：AI HTTP、时钟、随机源和快速测试的 IndexedDB；真实浏览器用例不 mock Worker/DB/WASM/SW。局部 AI UI 可用 Provider 替身，E2E 至少一条走真实 HTTP adapter。
+- 不给标准库、第三方库、纯转调薄封装或纯样式组件补 Unit；自有校验、组合及错误映射才测，接线由 E2E 覆盖。
+- 测试名含 `[WF-02]` 等 ID；一组可参数化，每条只断言一个清晰行为。expected 来自固定向量/协议，不能用被测实现生成；round-trip 不能替代固定预期。
+- UUID 不断言具体随机值或“两次不同”；精确耗时只在可控时钟测试断言，浏览器测有界完成和响应性。
+
+## 2. Unit / Component / 存储用例
+
+### 协议与内置工具
+
+| ID | 验收行为 |
+| --- | --- |
+| CT-01 | 合法 manifest 保留；空 ID/版本/名称/描述、未知 source、坏 Schema 在注册前拒绝 |
+| CT-02 | 注册/查找/分类正确；重复 ID 不覆盖旧工具，未知 ID 为 `UNKNOWN_TOOL` |
+| CT-03 | 缺必填/错类型/越界/不支持 Schema 拒绝，默认值按协议生效而非隐式转换 |
+| CT-04 | 持久化和 Worker 消息边界拒绝非字符串输出、非法状态/错误，不以类型断言绕过 |
+| CT-05 | 自有错误映射准确，未知异常为 `EXECUTION_FAILED`，详情无完整输入或秘密哨兵 |
+| BT-01 | JSON 自有配置/错误逻辑：缩进、标量/数组、空/坏输入；不重测 `JSON.parse` |
+| BT-02 | Base64 UTF-8、Unicode/空字符串及固定向量；坏编码/UTF-8 不静默修复 |
+| BT-03 | JWT 分段/Base64URL/JSON 和组合输出；坏结构失败，成功不代表验签 |
+| BT-04 | 时间方向/单位/时区、无时区拒绝、无效/超范围输入；固定纪元预期 |
+| BT-05 | URL/UUID 不加透传 Unit，登记和 UI 接线由 E-01 验证 |
+
+BT- 用例仅为最终存在的自有非平凡逻辑建 Unit，薄封装说明复用 E-01，不为编号硬凑测试。
+
+### 工作流与 UI
+
+| ID | 验收行为 |
+| --- | --- |
+| WF-01 | 空步骤、重复 step ID、未知工具、坏配置、步骤超限在执行前失败 |
+| WF-02 | 顺序传值准确；首/中/末失败位置正确，后续无输出，整体结束 |
+| WF-03 | 增删/移动保留 ID 与配置，边界移动安全；旧结果不冒充编辑后的结果 |
+| WF-04 | 取消后无后续执行，旧轮迟到响应不覆盖新轮，已完成结果仍可查看 |
+| WF-05 | 保存工具快照独立于原工作流修改/删除，执行符合快照承诺 |
+| WF-06 | 合法嵌套可执行；缺依赖显示路径，自引用/间接循环/展开超限拒绝 |
+| UI-01 | 系统/显式主题互不覆盖，响应系统变化，刷新保持；存储失败行为明确 |
+| UI-02 | 工具成功/失败/空结果/执行中区分，坏配置不执行，可取消恢复 |
+| UI-03 | 支持的 string/number/boolean/enum 配置正确提交，不支持 Schema 明确失败 |
+| UI-04 | 编辑器增删排序配置正确，失败可定位，结果匹配执行版本 |
+| UI-05 | 保存/删除/重命名/转工具校验及取消不丢内容；写失败可见、可重试 |
+| UI-06 | 可查询标签、键盘与焦点返回；工具/AI/源码文本不作为 HTML 执行 |
+| UI-07 | 未就绪不声称离线可用；暂缓更新保留编辑，确认前可保存/导出 |
+
+### AI、存储与备份
+
+| ID | 验收行为 |
+| --- | --- |
+| AI-01 | endpoint/model/必要鉴权头正确，默认请求不含输入样例 |
+| AI-02 | 401/429/5xx/坏 JSON/错结构/空输出/网络/超时/取消可区分，不返回伪成功 |
+| AI-03 | 工作流草稿拒绝未知工具、坏配置、超限、代码字段和错误结构；严格 JSON，不猜 Markdown |
+| AI-04 | AI 新建/修改/修复只在确认后生效；取消/失败/迟到结果不覆盖用户内容 |
+| AI-05 | 默认只发需求、工具描述/Schema、脱敏错误；样例需主动开启，日志/持久化无 Key |
+| AI-06 | 工具草稿校验 manifest、源码、数据型测试、大小、返回协议；空/坏测试不启用 |
+| AI-07 | 未测/失败不能启用；改源码/Schema/测试使通过状态失效；拒绝不改已有工具 |
+| AI-08 | 启用/更新/删除的存储与注册一致；坏更新保留旧版，依赖影响明确 |
+| DB-01 | Repository 增删改查可读回，更新/删除不误伤其他数据或依赖，未知 ID 明确处理 |
+| DB-02 | 已发布各旧版 fixture 可迁移；好记录保留、坏记录报告，失败不部分改写 |
+| DB-03 | 写失败/配额/拒绝不报成功，已有数据及内存编辑保留 |
+| IO-01 | 备份往返保留工作流/工具/依赖/设置/版本，不含 Key、执行输入或临时 AI 响应 |
+| IO-02 | 坏 JSON/未知版本/重复 ID/坏 Schema/循环/超限拒绝；冲突明确确认 |
+| IO-03 | 写失败整笔回滚；导入 AI 工具重为草稿，不信任 tested/enabled 标志 |
+
+## 3. 真实浏览器与 E2E 用例
+
+### 工具、工作流、恢复
+
+| ID | 验收行为 |
+| --- | --- |
+| E-00 | 生产构建主界面可访问，无未处理 page error 或缺失静态资源 |
+| E-01 | UI 运行全部 9 个工具的固定向量/错误；含 Unicode、空文本、未验签提示、UUID v4、明确时区 |
+| E-02 | 真实 Worker 从构建 URL 加载、请求匹配；取消/崩溃可恢复，迟到响应无污染 |
+| E-03 | `%7B%22x%22%3A1%7D` 经 URL 解码为 `{"x":1}` 再格式化，每步结果可查看 |
+| E-04 | UI 增删移动配置一致；第一/中间步骤失败停止后续，取消后可再运行 |
+| E-05 | 保存/刷新/重开保留工作流和主题；专属 profile 真正重启后仍可用，Key 不保留 |
+| E-06 | 真实旧 IndexedDB 升级后通过 UI 运行原流程；坏记录可诊断，其余可用 |
+| E-07 | 工作流变工具后修改/删除原流程，再加入新流程；快照有效、缺依赖错误可见 |
+| E-08 | UI 导出后新 context 导入可运行；冲突不覆盖，AI 工具重新测试确认 |
+| E-09 | 桌面/375px、键盘、深浅主题可操作；焦点/错误可读，HTML 文本不执行 |
+
+### PWA
+
+| ID | 验收行为 |
+| --- | --- |
+| PWA-01 | manifest/start URL/scope/standalone、真实图标/尺寸正确，SW 控制且预缓存完成才就绪 |
+| PWA-02 | 在线就绪后真实断网，关闭再开/刷新，app shell、JS/CSS/Worker 均可用 |
+| PWA-03 | 离线不只显示 UI，还实际运行代表工具和持久化的 E-03 流程并断言输出 |
+| PWA-04 | 未打开过 AI 模块也预缓存 WASM；断网新页首次初始化真实 QuickJS 并执行已保存 AI 工具 |
+| PWA-05 | 用虚假秘密哨兵请求/执行后，Cache Storage 仅允许静态资源，无 API、Key、用户文本 |
+| PWA-06 | 同 origin 真实 A→B：waiting 提示、暂缓不丢编辑、保存/导出后确认激活，B 与旧数据可用 |
+| PWA-07 | 首次离线不声称已就绪；已有应用离线 AI 错误明确，本地执行不受影响 |
+
+### AI 与沙箱
+
+| ID | 验收行为 |
+| --- | --- |
+| AE-01 | 本地 AI HTTP 经真实 adapter 返回草稿，先预览，确认才可用，拒绝不改原流程 |
+| AE-02 | 401/429/网络/坏 JSON/未知工具/坏配置等代表失败可见；修改/修复也需确认，本地可用 |
+| AE-03 | 默认请求无样例，开启后才有；真实允许/拒绝 CORS，不关闭浏览器安全策略 |
+| AE-04 | 固定逐行 trim 工具：`"  alpha  \n beta "` → `"alpha\nbeta"`；看源码、测试和独立向量后确认，串联并刷新再运行 |
+| AE-05 | 语法错/测试失败/空测试/篡改状态不可启用；改源码失效；取消不安装 |
+| AE-06 | 更新失败/拒绝保留旧工具，已有工作流仍可运行 |
+| SB-01 | 真实 QuickJS 返回固定字符串；语法/运行异常和非字符串输出失败，无宿主 eval/new Function 兜底 |
+| SB-02 | fetch/WebSocket/import/DOM/storage/文件/constructor/globalThis 路径无法触及宿主或秘密，无外联 |
+| SB-03 | 真无限循环/递归/分配/超大输出被限制；UI 可响应，报错后下一次合法运行成功 |
+| SB-04 | 每次 guest 全局隔离，重复运行/取消释放 Worker 和 QuickJS handles，活跃任务不持续累积 |
+
+SB 用例只是列明边界的回归，不是形式化安全证明；逃逸或终止失败即阻止 AI 工具交付。
+
+## 4. 固定向量与测试数据
+
+下列向量在[待确认行为](contracts.md#待确认决策)获批后冻结，复用于 Unit/E-01，不从实现生成 expected：
+
+| 工具 | 输入 / 配置 | 预期 |
+| --- | --- | --- |
+| JSON 格式化 / 压缩 | `{"x":1}`，indent=2；反向输入格式化文本 | `"{\n  \"x\": 1\n}"`；`{"x":1}` |
+| Base64 编码 / 解码 | `hello`、`你好`；反向输入编码文本 | `aGVsbG8=`、`5L2g5aW9`；还原原文 |
+| URL 编码 / 解码 | `a b+中`；反向输入编码文本 | `a%20b%2B%E4%B8%AD`；还原原文，字面量 `+` 不变 |
+| JWT 解码 | `eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.c2ln` | `{ "header": { "alg": "HS256" }, "payload": { "sub": "123" } }`，未验签 |
+| UUID | 空字符串 | v4 和 RFC variant 结构，无具体随机值断言 |
+| 时间 | `0`，seconds-to-iso | `1970-01-01T00:00:00.000Z` |
+
+失败向量至少含 `{`、Base64 `%%%`、URL `%ZZ`、JWT `invalid`、时间 `not-a-date`，公共执行入口返回 `INVALID_INPUT`；空编码成功不等于空 JSON 成功。
+
+- 其他 fixture 按步骤新增：旧 DB、备份、AI 正常/失败响应、恶意源码、PWA A/B 构建；不预建未来空测试。
+- 用合成输入和虚假 Key；禁止真实秘密进入 fixture、日志、trace、截图或上传产物。
+- 快速测试邻近模块；`tests/browser/` 测平台边界，`tests/e2e/` 测用户路径，`tests/fixtures/` 放共享数据。旧 DB 可直接预置，业务结果通过 Repository/UI 读回。
+
+## 5. 浏览器与执行夹具
+
+- 每包跑全部已实现 Chromium 回归；协议/Worker/存储/PWA/沙箱变更及发布跑 Chromium、Firefox、WebKit。窄屏只代表 viewport，原生安装/iOS 主屏幕/系统启动/人工视觉单独验收。
+- 普通用例用新 context/唯一 DB；重启用例独占临时 persistent profile，仅清理测试资源，不用开发者资料。
+- 只允许本地站点和 AI fixture endpoint，意外网络失败；HTTP fixture 支持固定响应、延迟、错误与 CORS，不注入绕过校验的产品开关。
+- 非 PWA 的 AI 测试可 route HTTP；PWA/缓存隐私用真实本地 HTTP fixture，避免 SW 绕过 route。mock 配额/网络失败不代表真实磁盘或供应商已验证。
+- E2E 由 Playwright webServer 管理新生产 `dist` 的静态服务；固定 origin，运行后回收。不得复用过期构建。
+- PWA 允许真实 SW，等待 controller/预缓存/离线就绪而非 sleep；真 offline context 新页/刷新并执行 Worker/WASM，不拦截伪造离线，也不只看 `navigator.onLine`。
+- 更新 fixture 构建真实 A/B，在同 origin 切静态版本并触发更新，等 waiting/activated；B 有版本标识和资源变化，不 mock waiting 或只改 UI 版本号。
+- 重跑隔离 SW/缓存并释放 Worker、计时器、context、DB 和服务，不靠强退掩盖泄漏。
+
+## 6. 命令、CI 与完成标准
+
+以下脚本由 PR-01 建立，之后以实际 `package.json` 为准。脚本非交互、错误向上传播，过滤器零匹配/零测试须失败，不能用 `|| true` 掩盖结果。
+
+| 命令 | 职责 |
+| --- | --- |
+| `pnpm typecheck` / `pnpm lint` / `pnpm format:check` | 严格检查应用/Worker/测试类型、静态规则和格式 |
+| `pnpm test` / `pnpm test:coverage` | 单次 Unit/Component/快速存储 Integration；V8 coverage |
+| `pnpm build` | 类型检查与生产构建 |
+| `pnpm e2e --project=chromium` / `pnpm e2e` | 当前代码生产构建后的 Chromium / 三浏览器矩阵 |
+| `pnpm verify` | static → coverage → build → 全部 Chromium；失败即停 |
+| `pnpm verify:release` | 同上但三浏览器；不自动发布 |
+
+定向示例：`pnpm test -t '\[WF-02\]'`、`pnpm e2e --project=chromium --grep '\[E-03\]'`。PR-01 已用 APP-00/E-00 验证参数转发、零匹配退出码和精确 ID 匹配；其余 ID 随功能实现。脚本避免重复构建，但直接 e2e 必须构建当前代码。
+
+### CI 与证据
+
+- PR-01 起每个实现 PR 跑 static/Unit/Chromium；上述平台关键变更和发布跑全矩阵，各浏览器分别报告。固定 Node/pnpm、lockfile 和 Playwright 浏览器安装方式，缺浏览器明确阻塞。
+- 建议待 review 的关键自有逻辑覆盖率：lines/functions/statements ≥90%、branches ≥85%；不含三方/生成/类型/fixture/薄封装/纯浏览器入口。排除范围需说明，不能忽略业务文件凑分；矩阵失败分支仍须覆盖，coverage 不替代 E2E。
+- 默认 retries=0，保留首次失败；独立重跑说明原因。禁止 `.only`、未经批准的 `.skip`/`.todo`、无断言、`passWithNoTests`；未处理 rejection 和意外外联失败。
+- Unit 可用假时钟；真实超时需 browser 验证。恶意 fixture 有有界输入、Worker 硬终止和外层 watchdog，不能拖死 runner。
+- 保留 JUnit/HTML、coverage、失败 trace/截图和必要 console/网络记录；报告工作区版本、环境、时间、命令/退出码/数量/路径及未验证项，不用 HEAD 冒充未提交改动。
+- 产物 `test-results/unit/`、`test-results/browser/`、`coverage/`、`playwright-report/` 不提交；只清理本轮旧产物，视频按需，秘密不上传。
+
+### 性能与发布
+
+PR-01 记录 bundle，PR-04/PR-14 记录 Worker/WASM 冷启动，PR-18 固定测试环境、输入、次数和 review 后预算。场景含 1 MiB JSON、长文本编辑、最长流程、QuickJS 初次/再次运行、运行时取消；无预算只称基线，不称性能达标，不凭共享 runner 单次波动下结论。
+
+**完成条件**：获批协议/用例 → 真实 Red/Green（基础设施失败不算行为 Red）→ 定向与全量检查通过 → 证据可复现 → 人工/环境限制如实列明 → 在 review 点停止。只有文档时只报告文档校验，不能生成虚假测试或 coverage 结果。

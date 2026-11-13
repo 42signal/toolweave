@@ -10,7 +10,7 @@ export default defineConfig({
     allowOnly: false,
     passWithNoTests: false,
     retry: 0,
-    reporters: ["default", "junit"],
+    reporters: ["default", "junit", "./src/test/require-executed-tests.ts"],
     outputFile: { junit: "test-results/unit/junit.xml" },
     coverage: {
       provider: "v8",

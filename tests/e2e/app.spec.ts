@@ -21,15 +21,15 @@ test("[E-00] 生产页面打开及刷新后工作区可用且资源无错误", a
   });
 
   await page.goto("/");
-  await expect(page).toHaveTitle("Developer Toolbox");
+  await expect(page).toHaveTitle("Toolweave AI");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Developer Toolbox" }),
+    page.getByRole("heading", { level: 1, name: "Toolweave AI" }),
   ).toBeVisible();
   await expect(page.getByRole("main", { name: "工作区" })).toBeVisible();
 
   await page.reload();
   await expect(
-    page.getByRole("heading", { level: 1, name: "Developer Toolbox" }),
+    page.getByRole("heading", { level: 1, name: "Toolweave AI" }),
   ).toBeVisible();
   await expect(page.getByRole("main", { name: "工作区" })).toBeVisible();
   expect(errors).toEqual([]);

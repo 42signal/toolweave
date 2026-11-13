@@ -1,0 +1,143 @@
+:root {
+  color-scheme: dark;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  color: var(--foreground);
+  background: var(--background);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --background: #0b0e0c;
+  --surface: #101411;
+  --foreground: #d5ded7;
+  --muted: #8b9b90;
+  --border: #2c3830;
+  --accent: #8ddb9b;
+  --accent-surface: #19291e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+::selection {
+  color: var(--background);
+  background: var(--accent);
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  width: min(100% - 3rem, 90rem);
+  min-height: 100svh;
+  margin-inline: auto;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.5rem;
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -0.03em;
+}
+
+.prompt {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  color: var(--accent);
+  background: var(--accent-surface);
+  border: 1px solid var(--border);
+  font-size: 1rem;
+}
+
+.workspace-path,
+.tool-count {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin-block: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.workspace-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-right: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+h2 {
+  margin: 0;
+  padding: 0.875rem 1.25rem;
+  color: var(--accent);
+  border-top: 2px solid var(--accent);
+  border-right: 1px solid var(--border);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.empty-workspace {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 24rem;
+  padding: 2rem;
+  color: var(--muted);
+}
+
+.empty-symbol {
+  color: var(--accent);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.empty-workspace p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.75;
+}
+
+@media (max-width: 40rem) {
+  .app-shell {
+    width: calc(100% - 1.5rem);
+  }
+
+  .workspace-path {
+    display: none;
+  }
+
+  main {
+    margin-block: 0.75rem;
+  }
+}
