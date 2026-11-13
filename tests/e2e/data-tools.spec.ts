@@ -102,6 +102,62 @@ for (const language of ["data-en", "data-zh"]) {
       const now = Number(await timeOutput.inputValue());
       expect(now).toBeGreaterThanOrEqual(beforeNow);
       expect(now).toBeLessThanOrEqual(Date.now());
+      await page
+        .getByRole("button", {
+          name: chinese ? "Diff 比较" : "Diff",
+          exact: true,
+        })
+        .click();
+      const before = page.getByLabel(chinese ? "原始内容" : "Before", {
+        exact: true,
+      });
+      const after = page.getByLabel(chinese ? "修改内容" : "After", {
+        exact: true,
+      });
+      const diffOutput = page.getByLabel(chinese ? "差异输出" : "Diff output");
+      await before.fill('{"a":1}');
+      await after.fill("a: 2");
+      await run.click();
+      await expect(diffOutput).toHaveValue(
+        '[\n  {\n    "op": "replace",\n    "path": "/a",\n    "value": 2\n  }\n]',
+      );
+      await page
+        .getByRole("combobox", { name: chinese ? "语言" : "Language" })
+        .selectOption(chinese ? "en" : "zh-CN");
+      await expect(
+        page.getByLabel(chinese ? "Before" : "原始内容", { exact: true }),
+      ).toHaveValue('{"a":1}');
+      await expect(
+        page.getByLabel(chinese ? "After" : "修改内容", { exact: true }),
+      ).toHaveValue("a: 2");
+      await expect(
+        page.getByLabel(chinese ? "Diff output" : "差异输出"),
+      ).toHaveValue(/"path": "\/a"/);
+      await page
+        .getByRole("combobox", { name: chinese ? "Language" : "语言" })
+        .selectOption(chinese ? "zh-CN" : "en");
+      await after.fill('{"a":1}');
+      await run.click();
+      await expect(
+        page.getByText(chinese ? "没有差异" : "No differences", {
+          exact: true,
+        }),
+      ).toBeVisible();
+      await before.fill("hello\nold\n");
+      await after.fill("hello\nnew\n");
+      await run.click();
+      await expect(diffOutput).toHaveValue(/ hello\n-old\n\+new\n/);
+      await page
+        .getByLabel(chinese ? "比较模式" : "Comparison mode")
+        .selectOption("structured");
+      await run.click();
+      await expect(page.getByRole("alert")).toBeVisible();
+      await expect(diffOutput).toHaveValue("");
+      await before.fill('{"ok":true}');
+      await after.fill("ok: true");
+      await run.click();
+      await expect(diffOutput).toHaveValue("[]");
+      await expect(page.getByRole("alert")).toHaveCount(0);
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth),
       ).toBe(375);

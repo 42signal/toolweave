@@ -113,6 +113,16 @@ export const zhCN: Translations = {
         "请输入包含 protocol、host、pathname、query 字符串或数组值和 hash 的 URL JSON。",
       invalidConfig: "此工具没有可配置选项。",
     },
+    "diff.compare": {
+      name: "Diff 比较",
+      description: "结构化比较 JSON/YAML，或逐行比较文本。",
+      input: "原始内容",
+      output: "差异输出",
+      placeholder: "原始 JSON、YAML 或文本",
+      invalidInput:
+        "结构化比较需要两份有效的对象或数组，普通文本请选择文本模式。",
+      invalidConfig: "请选择自动识别、结构化或文本比较。",
+    },
   },
   formats: {
     auto: "自动识别",

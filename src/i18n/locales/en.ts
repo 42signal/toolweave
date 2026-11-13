@@ -115,6 +115,16 @@ export const en = {
         "Enter URL JSON with protocol, host, pathname, query strings or arrays, and hash.",
       invalidConfig: "This tool has no configurable options.",
     },
+    "diff.compare": {
+      name: "Diff",
+      description: "Compare structured JSON/YAML or plain text.",
+      input: "Before",
+      output: "Diff output",
+      placeholder: "Original JSON, YAML, or text",
+      invalidInput:
+        "Enter two valid objects or arrays for structured comparison, or choose Text.",
+      invalidConfig: "Choose Auto, Structured, or Text comparison.",
+    },
   },
   formats: {
     auto: "Auto",

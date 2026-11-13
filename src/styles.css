@@ -252,6 +252,22 @@ textarea:disabled {
   border-left: 1px solid var(--border);
 }
 
+.diff-result {
+  border: 1px solid var(--border);
+  border-top: 0;
+}
+
+.diff-result textarea {
+  min-height: 12rem;
+}
+
+.diff-empty {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  color: var(--accent);
+  font-size: 0.75rem;
+}
+
 .editor-label {
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--border);

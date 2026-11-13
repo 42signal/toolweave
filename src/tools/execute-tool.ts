@@ -5,6 +5,7 @@ import type { ToolResult } from "./protocol";
 import { decodeBase64, decodeJWT, encodeBase64 } from "./text-tools";
 import { buildURL, parseURL } from "./url-tools";
 import { convertTime } from "./unix-time";
+import { compareDiff } from "./diff";
 
 const textTools: Record<string, (input: string) => string> = {
   "base64.encode": encodeBase64,
@@ -39,6 +40,7 @@ export function executeTool(request: unknown): ToolResult {
   if (
     !tool &&
     request.toolId !== "unix-time.convert" &&
+    request.toolId !== "diff.compare" &&
     !Object.hasOwn(textTools, request.toolId)
   ) {
     return {
@@ -58,6 +60,11 @@ export function executeTool(request: unknown): ToolResult {
     if (request.toolId === "unix-time.convert")
       return {
         ...convertTime(request.input, request.config),
+        durationMs: performance.now() - startedAt,
+      };
+    if (request.toolId === "diff.compare")
+      return {
+        ...compareDiff(request.input, request.config),
         durationMs: performance.now() - startedAt,
       };
     if (!isRecord(request.config) || Object.keys(request.config).length !== 0)

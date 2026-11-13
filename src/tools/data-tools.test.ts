@@ -1,5 +1,4 @@
 import { afterEach, expect, test, vi } from "vitest";
-
 import { executeTool } from "./execute-tool";
 
 afterEach(() => vi.useRealTimers());
@@ -185,3 +184,82 @@ test.each([
     error: { code: "INVALID_CONFIG" },
   });
 });
+
+test.each([
+  ['{"a":1,"b":2}', "b: 2\na: 1", "[]"],
+  [
+    '{"a":1}',
+    "a: 2",
+    '[\n  {\n    "op": "replace",\n    "path": "/a",\n    "value": 2\n  }\n]',
+  ],
+  [
+    '{"old":1}',
+    '{"new":2}',
+    '[\n  {\n    "op": "remove",\n    "path": "/old"\n  },\n  {\n    "op": "add",\n    "path": "/new",\n    "value": 2\n  }\n]',
+  ],
+  [
+    '{"a/b~c":1}',
+    '{"a/b~c":2}',
+    '[\n  {\n    "op": "replace",\n    "path": "/a~1b~0c",\n    "value": 2\n  }\n]',
+  ],
+  [
+    "[1,2]",
+    "[2,1]",
+    '[\n  {\n    "op": "replace",\n    "path": "/0",\n    "value": 2\n  },\n  {\n    "op": "replace",\n    "path": "/1",\n    "value": 1\n  }\n]',
+  ],
+  [
+    "[1,2,3]",
+    "[1]",
+    '[\n  {\n    "op": "remove",\n    "path": "/2"\n  },\n  {\n    "op": "remove",\n    "path": "/1"\n  }\n]',
+  ],
+])("[DATA-DIFF] 结构化比较 %s → %s", (before, after, output) => {
+  expect(
+    executeTool({
+      toolId: "diff.compare",
+      input: JSON.stringify({ before, after }),
+      config: {},
+    }),
+  ).toMatchObject({ ok: true, output });
+});
+
+test.each(["auto", "text"])("[DATA-DIFF] 文本回退和换行 Diff：%s", (mode) => {
+  const result = executeTool({
+    toolId: "diff.compare",
+    input: JSON.stringify({ before: "hello\nold\n", after: "hello\nnew\n" }),
+    config: { mode },
+  });
+  expect(result.ok).toBe(true);
+  if (!result.ok) throw new Error("Expected successful text comparison");
+  expect(result.output).toContain(" hello\n-old\n+new\n");
+});
+
+test("[DATA-DIFF] 相同文本成功无变化，不误判 YAML 字符串为对象", () => {
+  expect(
+    executeTool({
+      toolId: "diff.compare",
+      input: JSON.stringify({ before: "hello", after: "hello" }),
+      config: {},
+    }),
+  ).toMatchObject({ ok: true, output: "" });
+});
+
+test.each([
+  ["{}", {}],
+  [JSON.stringify({ before: 1, after: "{}" }), {}],
+  [JSON.stringify({ before: "a: [", after: "{}" }), { mode: "structured" }],
+  [JSON.stringify({ before: "hello", after: "world" }), { mode: "structured" }],
+])("[DATA-DIFF] 错误输入或显式结构化解析失败不回退", (input, config) => {
+  expect(executeTool({ toolId: "diff.compare", input, config })).toMatchObject({
+    ok: false,
+    error: { code: "INVALID_INPUT" },
+  });
+});
+
+test.each([null, { mode: "json" }, { extra: true }])(
+  "[DATA-DIFF] 配置边界：%j",
+  (config) => {
+    expect(
+      executeTool({ toolId: "diff.compare", input: "{}", config }),
+    ).toMatchObject({ ok: false, error: { code: "INVALID_CONFIG" } });
+  },
+);

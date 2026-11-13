@@ -1,9 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
-
 import { App } from "./App";
-
 import { latestWorker, TestWorker } from "./test/test-worker";
 
 beforeEach(() => {
@@ -13,6 +10,45 @@ beforeEach(() => {
 });
 
 afterEach(() => vi.unstubAllGlobals());
+
+test("[DATA-UI] Diff 双输入封装、禁用和编辑清理，不把文本执行为 HTML", async () => {
+  render(<App />);
+  fireEvent.click(screen.getByRole("button", { name: "Diff 比较" }));
+  fireEvent.change(screen.getByLabelText("原始内容"), {
+    target: { value: "<script>old</script>" },
+  });
+  fireEvent.change(screen.getByLabelText("修改内容"), {
+    target: { value: "new" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "运行" }));
+  expect(latestWorker().requests).toEqual([
+    {
+      toolId: "diff.compare",
+      input: '{"before":"<script>old</script>","after":"new"}',
+      config: { mode: "auto" },
+    },
+  ]);
+  expect(screen.getByLabelText("原始内容")).toBeDisabled();
+  expect(screen.getByLabelText("修改内容")).toBeDisabled();
+  expect(screen.getByLabelText("比较模式")).toBeDisabled();
+  latestWorker().respond({
+    ok: true,
+    output: "<script>diff</script>",
+    durationMs: 1,
+  });
+  await waitFor(() =>
+    expect(screen.getByLabelText("差异输出")).toHaveValue(
+      "<script>diff</script>",
+    ),
+  );
+  fireEvent.change(screen.getByLabelText("修改内容"), {
+    target: { value: "other" },
+  });
+  expect(screen.getByLabelText("差异输出")).toHaveValue("");
+  fireEvent.click(screen.getByRole("button", { name: "运行" }));
+  fireEvent.click(screen.getByRole("button", { name: "取消运行" }));
+  await waitFor(() => expect(screen.getByLabelText("修改内容")).toBeEnabled());
+});
 
 test("[UI-02] 运行期间不重复提交，成功后展示输出和耗时，编辑清除旧结果", async () => {
   render(<App />);
@@ -85,7 +121,7 @@ test("[UI-02] 用户可以取消，卸载释放正在运行的 Worker", async ()
 
 test("[UI-02] 切换工具保留输入并清除旧结果，压缩不带缩进配置", async () => {
   render(<App />);
-  expect(screen.getByText("11 个工具")).toBeVisible();
+  expect(screen.getByText("12 个工具")).toBeVisible();
   fireEvent.change(screen.getByLabelText("输入 JSON / YAML"), {
     target: { value: '{\n  "x": 1\n}' },
   });

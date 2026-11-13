@@ -1,6 +1,7 @@
 import {
   dataInputFormats,
   dataOutputFormats,
+  diffModes,
   timeInputFormats,
   timeOutputFormats,
 } from "./formats";
@@ -134,4 +135,19 @@ export const builtinTools = [
     "URL",
     "Build an HTTP URL from JSON components.",
   ),
+  {
+    ...builtin(
+      "diff.compare",
+      "Diff",
+      "Comparison",
+      "Compare structured JSON/YAML or plain text.",
+    ),
+    configSchema: {
+      type: "object",
+      properties: {
+        mode: { type: "string", enum: diffModes, default: "auto" },
+      },
+      additionalProperties: false,
+    },
+  },
 ];

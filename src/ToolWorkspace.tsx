@@ -7,6 +7,7 @@ import type { ToolResult, ToolRun } from "./tools/protocol";
 import {
   dataInputFormats,
   dataOutputFormats,
+  diffModes,
   timeInputFormats,
   timeOutputFormats,
 } from "./tools/formats";
@@ -21,6 +22,8 @@ export function ToolWorkspace() {
   const [timeOutputFormat, setTimeOutputFormat] = useState("seconds");
   const [dataInputFormat, setDataInputFormat] = useState("auto");
   const [dataOutputFormat, setDataOutputFormat] = useState("json");
+  const [diffMode, setDiffMode] = useState("auto");
+  const [after, setAfter] = useState("");
   const [result, setResult] = useState<ToolResult | null>(null);
   const [running, setRunning] = useState(false);
   const activeRun = useRef<ToolRun | null>(null);
@@ -40,7 +43,10 @@ export function ToolWorkspace() {
     setRunning(true);
     const task = startTool({
       toolId: selectedTool.id,
-      input,
+      input:
+        selectedTool.id === "diff.compare"
+          ? JSON.stringify({ before: input, after })
+          : input,
       config:
         selectedTool.id === "format"
           ? {
@@ -52,7 +58,9 @@ export function ToolWorkspace() {
             ? { inputFormat: dataInputFormat }
             : selectedTool.id === "unix-time.convert"
               ? { inputFormat: timeInputFormat, outputFormat: timeOutputFormat }
-              : {},
+              : selectedTool.id === "diff.compare"
+                ? { mode: diffMode }
+                : {},
     });
     activeRun.current = task;
     void task.result.then((nextResult) => {
@@ -66,6 +74,7 @@ export function ToolWorkspace() {
   const cancelled = result?.ok === false && result.error.code === "CANCELLED";
   const structured =
     selectedTool.id === "format" || selectedTool.id === "minify";
+  const diff = selectedTool.id === "diff.compare";
   const status = running
     ? t("runner.running")
     : result
@@ -223,7 +232,25 @@ export function ToolWorkspace() {
               </label>
             </>
           )}
-
+          {diff && (
+            <label className="indent-control">
+              {t("runner.diffMode")}
+              <select
+                value={diffMode}
+                disabled={running}
+                onChange={(event) => {
+                  setDiffMode(event.currentTarget.value);
+                  setResult(null);
+                }}
+              >
+                {diffModes.map((mode) => (
+                  <option key={mode} value={mode}>
+                    {t(`formats.${mode}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <div className="run-actions">
             {running && (
               <button
@@ -265,8 +292,27 @@ export function ToolWorkspace() {
               }}
             />
           </div>
-
-          {
+          {diff && (
+            <div className="editor-pane">
+              <label className="editor-label" htmlFor="diff-after">
+                {t("runner.after")}
+              </label>
+              <textarea
+                id="diff-after"
+                value={after}
+                disabled={running}
+                spellCheck={false}
+                autoCapitalize="off"
+                autoCorrect="off"
+                placeholder={t("runner.afterPlaceholder")}
+                onChange={(event) => {
+                  setAfter(event.currentTarget.value);
+                  setResult(null);
+                }}
+              />
+            </div>
+          )}
+          {!diff && (
             <div className="editor-pane">
               <label className="editor-label" htmlFor="json-output">
                 {selectedTool.id === "format" && dataOutputFormat === "yaml"
@@ -281,9 +327,25 @@ export function ToolWorkspace() {
                 placeholder={t("runner.outputPlaceholder")}
               />
             </div>
-          }
+          )}
         </div>
-
+        {diff && (
+          <div className="diff-result editor-pane">
+            <label className="editor-label" htmlFor="diff-output">
+              {t("tools.diff.compare.output")}
+            </label>
+            <textarea
+              id="diff-output"
+              value={result?.ok ? result.output : ""}
+              readOnly
+              spellCheck={false}
+              placeholder={t("runner.outputPlaceholder")}
+            />
+            {result?.ok && (result.output === "" || result.output === "[]") && (
+              <p className="diff-empty">{t("runner.noDifferences")}</p>
+            )}
+          </div>
+        )}
         <div className="result-bar">
           <p role="status">{status}</p>
           <span>{t("runner.privacy")}</span>
