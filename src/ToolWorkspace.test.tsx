@@ -85,7 +85,7 @@ test("[UI-02] 用户可以取消，卸载释放正在运行的 Worker", async ()
 
 test("[UI-02] 切换工具保留输入并清除旧结果，压缩不带缩进配置", async () => {
   render(<App />);
-  expect(screen.getByText("3 个工具")).toBeVisible();
+  expect(screen.getByText("4 个工具")).toBeVisible();
   fireEvent.change(screen.getByLabelText("输入 JSON / YAML"), {
     target: { value: '{\n  "x": 1\n}' },
   });
@@ -129,6 +129,33 @@ test("[UI-02] 切换工具保留输入并清除旧结果，压缩不带缩进配
   expect(screen.getByLabelText("输出 JSON")).toHaveValue("");
   expect(screen.getByLabelText("输入 JSON / YAML")).toHaveValue(
     '{\n  "x": 1\n}',
+  );
+});
+
+test("[UI-02] Base64 空输出仍为成功，错误不再显示 JSON 说明", async () => {
+  render(<App />);
+  fireEvent.click(screen.getByRole("button", { name: "Base64 解码" }));
+  fireEvent.click(screen.getByRole("button", { name: "运行" }));
+  latestWorker().respond({ ok: true, output: "", durationMs: 1 });
+  await waitFor(() =>
+    expect(screen.getByRole("status")).toHaveTextContent("完成"),
+  );
+  expect(screen.getByLabelText("输出文本")).toHaveValue("");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("输入 Base64"), {
+    target: { value: "%%%" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "运行" }));
+  latestWorker().respond({
+    ok: false,
+    error: { code: "INVALID_INPUT", message: "Private diagnostic" },
+    durationMs: 1,
+  });
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "请输入有效的标准 Base64 和 UTF-8 文本。",
+  );
+  expect(screen.getByRole("alert")).not.toHaveTextContent(
+    /INVALID_INPUT|JSON|Private diagnostic/,
   );
 });
 

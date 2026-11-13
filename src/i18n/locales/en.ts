@@ -39,6 +39,15 @@ export const en = {
       invalidInput: "Enter valid Unicode text without incomplete characters.",
       invalidConfig: "This tool has no configurable options.",
     },
+    "base64.decode": {
+      name: "Base64 Decoder",
+      description: "Decode standard Base64 as UTF-8 text.",
+      input: "Input Base64",
+      output: "Output text",
+      placeholder: "aGk=",
+      invalidInput: "Enter valid standard Base64 containing UTF-8 text.",
+      invalidConfig: "This tool has no configurable options.",
+    },
   },
   formats: {
     auto: "Auto",

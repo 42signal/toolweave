@@ -23,7 +23,7 @@ for (const language of ["en", "zh"] as const) {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto("/");
       await expect(
-        page.getByText(chinese ? "3 个工具" : "3 tools", { exact: true }),
+        page.getByText(chinese ? "4 个工具" : "4 tools", { exact: true }),
       ).toBeVisible();
       const vectors = [
         {
@@ -46,6 +46,13 @@ for (const language of ["en", "zh"] as const) {
           outputs: ["Output Base64", "输出 Base64"],
           input: "你好😀",
           output: "5L2g5aW98J+YgA==",
+        },
+        {
+          names: ["Base64 Decoder", "Base64 解码"],
+          inputs: ["Input Base64", "输入 Base64"],
+          outputs: ["Output text", "输出文本"],
+          input: "5L2g5aW98J+YgA==",
+          output: "你好😀",
         },
       ] as const;
       for (const vector of vectors) {
@@ -87,7 +94,42 @@ test.describe("edge cases", () => {
   test("[ALL-E02] 友好错误、修正恢复及成功空输出", async ({ page }) => {
     await page.goto("/");
     for (const scenario of [
+      {
+        tool: "Base64 Decoder",
+        inputLabel: "Input Base64",
+        outputLabel: "Output text",
+        invalid: "private-sentinel%%%",
+        valid: "aGk=",
+        output: "hi",
+        message: "Enter valid standard Base64 containing UTF-8 text.",
+      },
+    ]) {
+      await page
+        .getByRole("button", { name: scenario.tool, exact: true })
+        .click();
+      await page
+        .getByLabel(scenario.inputLabel, { exact: true })
+        .fill(scenario.invalid);
+      await page.getByRole("button", { name: "Run", exact: true }).click();
+      await expect(page.getByRole("alert")).toHaveText(scenario.message);
+      await expect(page.getByRole("alert")).not.toContainText(
+        /INVALID_INPUT|private-sentinel/,
+      );
+      await expect(
+        page.getByLabel(scenario.outputLabel, { exact: true }),
+      ).toHaveValue("");
+      await page
+        .getByLabel(scenario.inputLabel, { exact: true })
+        .fill(scenario.valid);
+      await page.getByRole("button", { name: "Run", exact: true }).click();
+      await expect(
+        page.getByLabel(scenario.outputLabel, { exact: true }),
+      ).toHaveValue(scenario.output);
+      await expect(page.getByRole("alert")).toHaveCount(0);
+    }
+    for (const scenario of [
       { tool: "Base64 Encoder", input: "Input text", output: "Output Base64" },
+      { tool: "Base64 Decoder", input: "Input Base64", output: "Output text" },
     ]) {
       await page
         .getByRole("button", { name: scenario.tool, exact: true })

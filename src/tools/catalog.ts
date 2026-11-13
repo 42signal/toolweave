@@ -68,4 +68,10 @@ export const builtinTools = [
     "Encoding",
     "Encode UTF-8 text as standard Base64.",
   ),
+  builtin(
+    "base64.decode",
+    "Base64 Decoder",
+    "Encoding",
+    "Decode standard Base64 as UTF-8 text.",
+  ),
 ];
