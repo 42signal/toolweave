@@ -97,6 +97,7 @@ for (const toolId of [
   "url.decode",
   "jwt.decode",
   "uuid.generate",
+  "url.parse",
 ]) {
   test.each([null, { extra: true }])(
     `[CT-03] ${toolId} 不接受额外或非对象配置：%j`,
@@ -194,4 +195,48 @@ test.each([
     ok: false,
     error: { code: "INVALID_CONFIG" },
   });
+});
+
+const urlJSON =
+  '{\n  "protocol": "https:",\n  "host": "example.com:8080",\n  "pathname": "/search",\n  "query": {\n    "q": "hello world",\n    "tag": [\n      "a",\n      "b"\n    ]\n  },\n  "hash": "#results"\n}';
+
+test("[BT-06] URL 解析保留重复参数顺序并明确解码 +", () => {
+  expect(
+    executeTool({
+      toolId: "url.parse",
+      input:
+        "https://example.com:8080/search?q=hello+world&tag=a&tag=b#results",
+      config: {},
+    }),
+  ).toMatchObject({
+    ok: true,
+    output: urlJSON,
+  });
+});
+
+test("[BT-06] IPv6、空 query 和编码后的路径/片段保留", () => {
+  expect(
+    executeTool({
+      toolId: "url.parse",
+      input: "http://[::1]:8080/a%20b#x%20y",
+      config: {},
+    }),
+  ).toMatchObject({
+    ok: true,
+    output:
+      '{\n  "protocol": "http:",\n  "host": "[::1]:8080",\n  "pathname": "/a%20b",\n  "query": {},\n  "hash": "#x%20y"\n}',
+  });
+});
+
+test.each([
+  "/relative",
+  "ftp://example.com/",
+  "https://user@example.com/",
+  "https://example.com/?q=%FF",
+  "https://example.com/%ZZ",
+  "not-a-url",
+])("[BT-06] URL 解析不支持或坏编码拒绝：%j", (input) => {
+  expect(executeTool({ toolId: "url.parse", input, config: {} })).toMatchObject(
+    { ok: false, error: { code: "INVALID_INPUT" } },
+  );
 });

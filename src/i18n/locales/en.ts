@@ -95,6 +95,15 @@ export const en = {
         "Enter a valid timestamp or supported date. Check the input format and timezone.",
       invalidConfig: "Choose supported input and output formats.",
     },
+    "url.parse": {
+      name: "URL to JSON",
+      description: "Parse an HTTP URL into editable components.",
+      input: "Input URL",
+      output: "Output JSON",
+      placeholder: "https://example.com/search?q=hello&tag=a&tag=b",
+      invalidInput: "Enter an absolute HTTP or HTTPS URL without credentials.",
+      invalidConfig: "This tool has no configurable options.",
+    },
   },
   formats: {
     auto: "Auto",

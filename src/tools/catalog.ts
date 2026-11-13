@@ -122,4 +122,10 @@ export const builtinTools = [
       additionalProperties: false,
     },
   },
+  builtin(
+    "url.parse",
+    "URL to JSON",
+    "URL",
+    "Parse an HTTP URL into editable components.",
+  ),
 ];

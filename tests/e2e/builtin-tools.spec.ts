@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+const parsedURL =
+  '{\n  "protocol": "https:",\n  "host": "example.com:8080",\n  "pathname": "/search",\n  "query": {\n    "q": "hello world",\n    "tag": [\n      "a",\n      "b"\n    ]\n  },\n  "hash": "#results"\n}';
+
 for (const language of ["en", "zh"] as const) {
   test.describe(language, () => {
     const chinese = language === "zh";
@@ -23,7 +26,7 @@ for (const language of ["en", "zh"] as const) {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto("/");
       await expect(
-        page.getByText(chinese ? "9 个工具" : "9 tools", { exact: true }),
+        page.getByText(chinese ? "10 个工具" : "10 tools", { exact: true }),
       ).toBeVisible();
       const vectors = [
         {
@@ -90,6 +93,14 @@ for (const language of ["en", "zh"] as const) {
           outputs: ["Output time", "输出时间"],
           input: "0",
           output: "0",
+        },
+        {
+          names: ["URL to JSON", "URL 转 JSON"],
+          inputs: ["Input URL", "输入 URL"],
+          outputs: ["Output JSON", "输出 JSON"],
+          input:
+            "https://example.com:8080/search?q=hello+world&tag=a&tag=b#results",
+          output: parsedURL,
         },
       ] as const;
       for (const vector of vectors) {
@@ -221,6 +232,16 @@ test.describe("edge cases", () => {
         output: "0",
         message:
           "Enter a valid timestamp or supported date. Check the input format and timezone.",
+      },
+      {
+        tool: "URL to JSON",
+        inputLabel: "Input URL",
+        outputLabel: "Output JSON",
+        invalid: "private-sentinel",
+        valid: "https://example.com/",
+        output:
+          '{\n  "protocol": "https:",\n  "host": "example.com",\n  "pathname": "/",\n  "query": {},\n  "hash": ""\n}',
+        message: "Enter an absolute HTTP or HTTPS URL without credentials.",
       },
     ]) {
       await page

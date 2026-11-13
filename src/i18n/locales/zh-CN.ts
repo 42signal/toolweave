@@ -93,6 +93,15 @@ export const zhCN: Translations = {
       invalidInput: "请输入有效时间戳或支持的日期，请检查输入格式和时区。",
       invalidConfig: "请选择支持的输入和输出格式。",
     },
+    "url.parse": {
+      name: "URL 转 JSON",
+      description: "将 HTTP URL 解析为可编辑的组件。",
+      input: "输入 URL",
+      output: "输出 JSON",
+      placeholder: "https://example.com/search?q=hello&tag=a&tag=b",
+      invalidInput: "请输入不含凭据的完整 HTTP 或 HTTPS URL。",
+      invalidConfig: "此工具没有可配置选项。",
+    },
   },
   formats: {
     auto: "自动识别",
