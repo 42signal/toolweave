@@ -23,7 +23,7 @@ for (const language of ["en", "zh"] as const) {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto("/");
       await expect(
-        page.getByText(chinese ? "6 个工具" : "6 tools", { exact: true }),
+        page.getByText(chinese ? "7 个工具" : "7 tools", { exact: true }),
       ).toBeVisible();
       const vectors = [
         {
@@ -68,6 +68,14 @@ for (const language of ["en", "zh"] as const) {
           input: "a%20b+%E4%B8%AD",
           output: "a b+中",
         },
+        {
+          names: ["JWT Decoder", "JWT 解码"],
+          inputs: ["Input JWT", "输入 JWT"],
+          outputs: ["Output JSON", "输出 JSON"],
+          input: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.c2ln",
+          output:
+            '{\n  "header": {\n    "alg": "HS256"\n  },\n  "payload": {\n    "sub": "123"\n  }\n}',
+        },
       ] as const;
       for (const vector of vectors) {
         const name = vector.names[index];
@@ -93,6 +101,20 @@ for (const language of ["en", "zh"] as const) {
           chinese ? "完成" : "Completed",
         );
       }
+      await page
+        .getByRole("button", {
+          name: chinese ? "JWT 解码" : "JWT Decoder",
+          exact: true,
+        })
+        .click();
+      await expect(
+        page.getByText(
+          chinese
+            ? "仅解码，未验证签名。"
+            : "Decoded only. Signature not verified.",
+          { exact: true },
+        ),
+      ).toBeVisible();
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth),
       ).toBe(375);
@@ -125,6 +147,15 @@ test.describe("edge cases", () => {
         valid: "a%20b",
         output: "a b",
         message: "Enter valid percent-encoded UTF-8 text.",
+      },
+      {
+        tool: "JWT Decoder",
+        inputLabel: "Input JWT",
+        outputLabel: "Output JSON",
+        invalid: "private-sentinel",
+        valid: "e30.e30.",
+        output: '{\n  "header": {},\n  "payload": {}\n}',
+        message: "Enter a three-part JWT with JSON header and payload.",
       },
     ]) {
       await page

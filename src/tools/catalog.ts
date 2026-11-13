@@ -81,4 +81,10 @@ export const builtinTools = [
     "URL",
     "Decode a URI component; + stays +.",
   ),
+  builtin(
+    "jwt.decode",
+    "JWT Decoder",
+    "Tokens",
+    "Decode a JWT without verifying its signature.",
+  ),
 ];

@@ -2,13 +2,14 @@ import { format } from "./format";
 import { minify } from "./minify";
 import { isRecord } from "./protocol";
 import type { ToolResult } from "./protocol";
-import { decodeBase64, encodeBase64 } from "./text-tools";
+import { decodeBase64, decodeJWT, encodeBase64 } from "./text-tools";
 
 const textTools: Record<string, (input: string) => string> = {
   "base64.encode": encodeBase64,
   "base64.decode": decodeBase64,
   "url.encode": encodeURIComponent,
   "url.decode": decodeURIComponent,
+  "jwt.decode": decodeJWT,
 };
 
 export function executeTool(request: unknown): ToolResult {

@@ -46,11 +46,56 @@ test("[BT-02] 编码不静默替换孤立 surrogate", () => {
   });
 });
 
+test("[BT-03] JWT 组合只输出 header/payload，不保留签名", () => {
+  expect(
+    executeTool({
+      toolId: "jwt.decode",
+      config: {},
+      input: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.c2ln",
+    }),
+  ).toMatchObject({
+    ok: true,
+    output:
+      '{\n  "header": {\n    "alg": "HS256"\n  },\n  "payload": {\n    "sub": "123"\n  }\n}',
+  });
+});
+
+test("[BT-03] JWT 空签名仍只解码而不声称验证", () => {
+  expect(
+    executeTool({ toolId: "jwt.decode", input: "e30.e30.", config: {} }),
+  ).toMatchObject({
+    ok: true,
+    output: '{\n  "header": {},\n  "payload": {}\n}',
+  });
+});
+
+test.each([
+  "",
+  "invalid",
+  "e30.e30",
+  "e30.e30.x.y",
+  "e30=.e30.sig",
+  "bnVsbA.e30.",
+  "e30.W10.",
+  "_w.e30.",
+  "ew.e30.",
+  "e30.e30.a",
+  "e30.e30.Zh",
+])("[BT-03] JWT 坏结构/编码/JSON 拒绝：%j", (input) => {
+  expect(
+    executeTool({ toolId: "jwt.decode", input, config: {} }),
+  ).toMatchObject({
+    ok: false,
+    error: { code: "INVALID_INPUT" },
+  });
+});
+
 for (const toolId of [
   "base64.encode",
   "base64.decode",
   "url.encode",
   "url.decode",
+  "jwt.decode",
 ]) {
   test.each([null, { extra: true }])(
     `[CT-03] ${toolId} 不接受额外或非对象配置：%j`,

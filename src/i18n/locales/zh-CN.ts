@@ -66,6 +66,15 @@ export const zhCN: Translations = {
       invalidInput: "请输入有效的百分号编码 UTF-8 文本。",
       invalidConfig: "此工具没有可配置选项。",
     },
+    "jwt.decode": {
+      name: "JWT 解码",
+      description: "解码 JWT，不验证签名。",
+      input: "输入 JWT",
+      output: "输出 JSON",
+      placeholder: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.c2ln",
+      invalidInput: "请输入包含 JSON 头部和载荷的三段 JWT。",
+      invalidConfig: "此工具没有可配置选项。",
+    },
   },
   formats: {
     auto: "自动识别",

@@ -105,6 +105,9 @@ export function ToolWorkspace() {
         </div>
         <span className="execution-location">{t("runner.local")}</span>
       </div>
+      {selectedTool.id === "jwt.decode" && (
+        <p className="tool-note">{t("runner.jwtWarning")}</p>
+      )}
 
       <form onSubmit={run}>
         <div className="tool-toolbar">

@@ -66,6 +66,15 @@ export const en = {
       invalidInput: "Enter valid percent-encoded UTF-8 text.",
       invalidConfig: "This tool has no configurable options.",
     },
+    "jwt.decode": {
+      name: "JWT Decoder",
+      description: "Decode a JWT without verifying its signature.",
+      input: "Input JWT",
+      output: "Output JSON",
+      placeholder: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.c2ln",
+      invalidInput: "Enter a three-part JWT with JSON header and payload.",
+      invalidConfig: "This tool has no configurable options.",
+    },
   },
   formats: {
     auto: "Auto",
