@@ -2,8 +2,11 @@ import { format } from "./format";
 import { minify } from "./minify";
 import { isRecord } from "./protocol";
 import type { ToolResult } from "./protocol";
+import { encodeBase64 } from "./text-tools";
 
-const textTools: Record<string, (input: string) => string> = {};
+const textTools: Record<string, (input: string) => string> = {
+  "base64.encode": encodeBase64,
+};
 
 export function executeTool(request: unknown): ToolResult {
   if (

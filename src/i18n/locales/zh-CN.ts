@@ -30,6 +30,15 @@ export const zhCN: Translations = {
       invalidInput: "请输入有效的 JSON 或 YAML，请检查格式及所选输入类型。",
       invalidConfig: "请选择自动识别、JSON 或 YAML 输入格式。",
     },
+    "base64.encode": {
+      name: "Base64 编码",
+      description: "将 UTF-8 文本编码为标准 Base64。",
+      input: "输入文本",
+      output: "输出 Base64",
+      placeholder: "Hello, 世界 👋",
+      invalidInput: "请输入有效的 Unicode 文本，不能包含不完整字符。",
+      invalidConfig: "此工具没有可配置选项。",
+    },
   },
   formats: {
     auto: "自动识别",

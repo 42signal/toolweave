@@ -38,4 +38,34 @@ export const minifyManifest = {
   },
 } as const;
 
-export const builtinTools = [formatManifest, minifyManifest];
+function builtin<const ToolId extends string>(
+  id: ToolId,
+  name: string,
+  category: string,
+  description: string,
+) {
+  return {
+    id,
+    name,
+    category,
+    description,
+    version: "1.0.0",
+    source: "builtin",
+    configSchema: {
+      type: "object",
+      properties: {},
+      additionalProperties: false,
+    },
+  } as const;
+}
+
+export const builtinTools = [
+  formatManifest,
+  minifyManifest,
+  builtin(
+    "base64.encode",
+    "Base64 Encoder",
+    "Encoding",
+    "Encode UTF-8 text as standard Base64.",
+  ),
+];

@@ -30,6 +30,15 @@ export const en = {
         "Enter valid JSON or YAML. Check the syntax and selected input format.",
       invalidConfig: "Choose Auto, JSON, or YAML as the input format.",
     },
+    "base64.encode": {
+      name: "Base64 Encoder",
+      description: "Encode UTF-8 text as standard Base64.",
+      input: "Input text",
+      output: "Output Base64",
+      placeholder: "Hello, 世界 👋",
+      invalidInput: "Enter valid Unicode text without incomplete characters.",
+      invalidConfig: "This tool has no configurable options.",
+    },
   },
   formats: {
     auto: "Auto",
