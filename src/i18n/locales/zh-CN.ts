@@ -75,6 +75,15 @@ export const zhCN: Translations = {
       invalidInput: "请输入包含 JSON 头部和载荷的三段 JWT。",
       invalidConfig: "此工具没有可配置选项。",
     },
+    "uuid.generate": {
+      name: "UUID 生成",
+      description: "生成安全随机的 UUID v4。",
+      input: "输入（忽略）",
+      output: "输出 UUID",
+      placeholder: "无需输入",
+      invalidInput: "UUID 生成失败，请重试。",
+      invalidConfig: "此工具没有可配置选项。",
+    },
   },
   formats: {
     auto: "自动识别",

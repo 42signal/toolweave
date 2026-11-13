@@ -23,7 +23,7 @@ for (const language of ["en", "zh"] as const) {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto("/");
       await expect(
-        page.getByText(chinese ? "7 个工具" : "7 tools", { exact: true }),
+        page.getByText(chinese ? "8 个工具" : "8 tools", { exact: true }),
       ).toBeVisible();
       const vectors = [
         {
@@ -75,6 +75,14 @@ for (const language of ["en", "zh"] as const) {
           input: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.c2ln",
           output:
             '{\n  "header": {\n    "alg": "HS256"\n  },\n  "payload": {\n    "sub": "123"\n  }\n}',
+        },
+        {
+          names: ["UUID Generator", "UUID 生成"],
+          inputs: ["Input (ignored)", "输入（忽略）"],
+          outputs: ["Output UUID", "输出 UUID"],
+          input: "ignored",
+          output:
+            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
         },
       ] as const;
       for (const vector of vectors) {

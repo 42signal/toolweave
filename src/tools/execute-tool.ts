@@ -10,6 +10,7 @@ const textTools: Record<string, (input: string) => string> = {
   "url.encode": encodeURIComponent,
   "url.decode": decodeURIComponent,
   "jwt.decode": decodeJWT,
+  "uuid.generate": () => crypto.randomUUID(),
 };
 
 export function executeTool(request: unknown): ToolResult {

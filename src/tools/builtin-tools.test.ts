@@ -96,6 +96,7 @@ for (const toolId of [
   "url.encode",
   "url.decode",
   "jwt.decode",
+  "uuid.generate",
 ]) {
   test.each([null, { extra: true }])(
     `[CT-03] ${toolId} 不接受额外或非对象配置：%j`,

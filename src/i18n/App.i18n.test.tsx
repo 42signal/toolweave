@@ -31,7 +31,7 @@ test("[I18N-02] 默认英文文案、无障碍名称和 html.lang 一致", () =>
     "Run the tool to see the result",
   );
   expect(screen.getByRole("status")).toHaveTextContent("Ready");
-  expect(screen.getByText("7 tools")).toBeVisible();
+  expect(screen.getByText("8 tools")).toBeVisible();
   expect(screen.getByRole("combobox", { name: "Language" })).toHaveValue(
     "auto",
   );

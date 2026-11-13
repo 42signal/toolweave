@@ -87,4 +87,10 @@ export const builtinTools = [
     "Tokens",
     "Decode a JWT without verifying its signature.",
   ),
+  builtin(
+    "uuid.generate",
+    "UUID Generator",
+    "Identifiers",
+    "Generate a cryptographically random UUID v4.",
+  ),
 ];

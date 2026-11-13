@@ -75,6 +75,15 @@ export const en = {
       invalidInput: "Enter a three-part JWT with JSON header and payload.",
       invalidConfig: "This tool has no configurable options.",
     },
+    "uuid.generate": {
+      name: "UUID Generator",
+      description: "Generate a cryptographically random UUID v4.",
+      input: "Input (ignored)",
+      output: "Output UUID",
+      placeholder: "No input needed",
+      invalidInput: "UUID generation failed. Try again.",
+      invalidConfig: "This tool has no configurable options.",
+    },
   },
   formats: {
     auto: "Auto",

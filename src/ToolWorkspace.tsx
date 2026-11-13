@@ -108,6 +108,9 @@ export function ToolWorkspace() {
       {selectedTool.id === "jwt.decode" && (
         <p className="tool-note">{t("runner.jwtWarning")}</p>
       )}
+      {selectedTool.id === "uuid.generate" && (
+        <p className="tool-note">{t("runner.uuidNote")}</p>
+      )}
 
       <form onSubmit={run}>
         <div className="tool-toolbar">
