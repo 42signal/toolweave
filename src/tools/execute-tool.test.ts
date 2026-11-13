@@ -38,7 +38,7 @@ test.each(
   });
 });
 
-for (const toolId of ["format"]) {
+for (const toolId of ["format", "minify"]) {
   test.each(["", " \n ", "{", '{"private-sentinel":'])(
     `[BT-01] ${toolId} 非法 JSON 返回脱敏错误：%j`,
     (input) => {
@@ -51,6 +51,23 @@ for (const toolId of ["format"]) {
     },
   );
 }
+
+test("[CT-02] 压缩分发到无缩进工具，配置仅接受空对象", () => {
+  expect(
+    executeTool({ toolId: "minify", input: '{\n  "x": 1\n}', config: {} }),
+  ).toMatchObject({ ok: true, output: '{"x":1}' });
+});
+
+test.each(
+  [undefined, null, [], "", { indent: 0 }, { extra: true }].map((config) => ({
+    config,
+  })),
+)("[BT-01] JSON 压缩拒绝非空或非对象配置：%j", ({ config }) => {
+  expect(executeTool({ toolId: "minify", input: "{}", config })).toMatchObject({
+    ok: false,
+    error: { code: "INVALID_CONFIG" },
+  });
+});
 
 test("[CT-02] 未知工具明确失败", () => {
   expect(

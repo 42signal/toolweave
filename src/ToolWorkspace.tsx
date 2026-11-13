@@ -41,7 +41,9 @@ export function ToolWorkspace() {
               inputFormat: dataInputFormat,
               outputFormat: dataOutputFormat,
             }
-          : {},
+          : selectedTool.id === "minify"
+            ? { inputFormat: dataInputFormat }
+            : {},
     });
     activeRun.current = task;
     void task.result.then((nextResult) => {
@@ -53,7 +55,8 @@ export function ToolWorkspace() {
   }
 
   const cancelled = result?.ok === false && result.error.code === "CANCELLED";
-  const structured = selectedTool.id === "format";
+  const structured =
+    selectedTool.id === "format" || selectedTool.id === "minify";
   const status = running
     ? t("runner.running")
     : result

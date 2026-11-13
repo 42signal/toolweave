@@ -1,4 +1,5 @@
 import { format } from "./format";
+import { minify } from "./minify";
 import { isRecord } from "./protocol";
 import type { ToolResult } from "./protocol";
 
@@ -17,7 +18,12 @@ export function executeTool(request: unknown): ToolResult {
     };
   }
 
-  const tool = request.toolId === "format" ? format : null;
+  const tool =
+    request.toolId === "format"
+      ? format
+      : request.toolId === "minify"
+        ? minify
+        : null;
   if (!tool && !Object.hasOwn(textTools, request.toolId)) {
     return {
       ok: false,

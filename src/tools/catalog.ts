@@ -22,4 +22,20 @@ export const formatManifest = {
   },
 } as const;
 
-export const builtinTools = [formatManifest];
+export const minifyManifest = {
+  id: "minify",
+  version: "1.0.0",
+  name: "Minify",
+  description: "Compress JSON or YAML into compact JSON.",
+  category: "Structured data",
+  source: "builtin",
+  configSchema: {
+    type: "object",
+    properties: {
+      inputFormat: { type: "string", enum: dataInputFormats, default: "auto" },
+    },
+    additionalProperties: false,
+  },
+} as const;
+
+export const builtinTools = [formatManifest, minifyManifest];

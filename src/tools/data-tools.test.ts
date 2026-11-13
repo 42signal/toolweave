@@ -15,6 +15,8 @@ test.each([
     { inputFormat: "yaml", outputFormat: "json", indent: 4 },
     '{\n    "x": 1\n}',
   ],
+  ["minify", "x: 1\ntext: a  b\n", {}, '{"x":1,"text":"a  b"}'],
+  ["minify", "[1, true]", { inputFormat: "json" }, "[1,true]"],
   ["format", "date: 2024-01-01", {}, '{\n  "date": "2024-01-01"\n}'],
   ["format", '"hello"', {}, '"hello"'],
 ])("[DATA-STRUCT] 结构化转换 %s %s", (toolId, input, config, output) => {
@@ -42,6 +44,8 @@ test.each([
 test.each([
   ["format", { inputFormat: "xml" }],
   ["format", { outputFormat: "auto" }],
+  ["minify", { outputFormat: "yaml" }],
+  ["minify", { inputFormat: 1 }],
 ])("[DATA-STRUCT] 不支持的格式配置拒绝 %s %j", (toolId, config) => {
   expect(executeTool({ toolId, input: "{}", config })).toMatchObject({
     ok: false,

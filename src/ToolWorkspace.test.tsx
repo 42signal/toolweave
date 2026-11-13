@@ -82,3 +82,84 @@ test("[UI-02] 用户可以取消，卸载释放正在运行的 Worker", async ()
   view.unmount();
   expect(worker.terminated).toBe(true);
 });
+
+test("[UI-02] 切换工具保留输入并清除旧结果，压缩不带缩进配置", async () => {
+  render(<App />);
+  expect(screen.getByText("2 个工具")).toBeVisible();
+  fireEvent.change(screen.getByLabelText("输入 JSON / YAML"), {
+    target: { value: '{\n  "x": 1\n}' },
+  });
+  fireEvent.change(screen.getByLabelText("缩进"), { target: { value: "4" } });
+  fireEvent.click(screen.getByRole("button", { name: "运行" }));
+  latestWorker().respond({
+    ok: true,
+    output: '{\n    "x": 1\n}',
+    durationMs: 1,
+  });
+  await waitFor(() =>
+    expect(screen.getByLabelText("输出 JSON")).toHaveValue('{\n    "x": 1\n}'),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "格式化" }));
+  expect(screen.getByLabelText("输出 JSON")).toHaveValue('{\n    "x": 1\n}');
+  fireEvent.click(screen.getByRole("button", { name: "压缩" }));
+  expect(screen.getByRole("heading", { name: "压缩" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "压缩" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  expect(screen.getByLabelText("输入 JSON / YAML")).toHaveValue(
+    '{\n  "x": 1\n}',
+  );
+  expect(screen.getByLabelText("输出 JSON")).toHaveValue("");
+  expect(screen.getByRole("status")).toHaveTextContent("等待运行");
+  expect(screen.queryByLabelText("缩进")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "运行" }));
+  expect(latestWorker().requests).toEqual([
+    {
+      toolId: "minify",
+      input: '{\n  "x": 1\n}',
+      config: { inputFormat: "auto" },
+    },
+  ]);
+  latestWorker().respond({ ok: true, output: '{"x":1}', durationMs: 1 });
+  await waitFor(() =>
+    expect(screen.getByLabelText("输出 JSON")).toHaveValue('{"x":1}'),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "格式化" }));
+  expect(screen.getByLabelText("输出 JSON")).toHaveValue("");
+  expect(screen.getByLabelText("输入 JSON / YAML")).toHaveValue(
+    '{\n  "x": 1\n}',
+  );
+});
+
+test("[UI-02] 压缩运行中禁切换，取消后恢复，切换清除错误和终态", async () => {
+  render(<App />);
+  fireEvent.click(screen.getByRole("button", { name: "压缩" }));
+  fireEvent.click(screen.getByRole("button", { name: "运行" }));
+  expect(screen.getByRole("button", { name: "格式化" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "压缩" })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "格式化" }));
+  expect(screen.getByRole("heading", { name: "压缩" })).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "取消运行" }));
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "格式化" })).toBeEnabled(),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "格式化" }));
+  expect(screen.getByRole("status")).toHaveTextContent("等待运行");
+  fireEvent.click(screen.getByRole("button", { name: "压缩" }));
+  fireEvent.click(screen.getByRole("button", { name: "运行" }));
+  latestWorker().respond({
+    ok: false,
+    error: { code: "INVALID_INPUT", message: "Private diagnostic" },
+    durationMs: 1,
+  });
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "请输入有效的 JSON 或 YAML，请检查格式及所选输入类型。",
+  );
+  expect(screen.getByRole("alert")).not.toHaveTextContent(
+    /INVALID_INPUT|Private diagnostic/,
+  );
+  fireEvent.click(screen.getByRole("button", { name: "格式化" }));
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent("等待运行");
+});

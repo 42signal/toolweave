@@ -65,6 +65,16 @@ for (const language of ["data-en", "data-zh"]) {
         /INVALID_INPUT|SyntaxError/,
       );
       await inputFormat.selectOption("auto");
+      await page
+        .getByRole("button", {
+          name: chinese ? "压缩" : "Minify",
+          exact: true,
+        })
+        .click();
+      await run.click();
+      await expect(
+        page.getByLabel(chinese ? "输出 JSON" : "Output JSON"),
+      ).toHaveValue('{"hello":"world","items":[1,2]}');
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth),
       ).toBe(375);

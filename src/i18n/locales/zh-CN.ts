@@ -21,6 +21,15 @@ export const zhCN: Translations = {
       invalidInput: "请输入有效的 JSON 或 YAML，请检查格式及所选输入类型。",
       invalidConfig: "请选择 JSON 或 YAML，以及 0–8 的缩进。",
     },
+    minify: {
+      name: "压缩",
+      description: "将 JSON 或 YAML 压缩为紧凑 JSON。",
+      input: "输入 JSON / YAML",
+      output: "输出 JSON",
+      placeholder: '{ "hello": "world" }',
+      invalidInput: "请输入有效的 JSON 或 YAML，请检查格式及所选输入类型。",
+      invalidConfig: "请选择自动识别、JSON 或 YAML 输入格式。",
+    },
   },
   formats: {
     auto: "自动识别",

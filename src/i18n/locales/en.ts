@@ -20,6 +20,16 @@ export const en = {
         "Enter valid JSON or YAML. Check the syntax and selected input format.",
       invalidConfig: "Choose JSON or YAML and an indent from 0 to 8.",
     },
+    minify: {
+      name: "Minify",
+      description: "Compress JSON or YAML into compact JSON.",
+      input: "Input JSON / YAML",
+      output: "Output JSON",
+      placeholder: '{ "hello": "world" }',
+      invalidInput:
+        "Enter valid JSON or YAML. Check the syntax and selected input format.",
+      invalidConfig: "Choose Auto, JSON, or YAML as the input format.",
+    },
   },
   formats: {
     auto: "Auto",
