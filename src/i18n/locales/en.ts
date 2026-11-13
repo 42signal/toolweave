@@ -1,0 +1,62 @@
+export const en = {
+  language: {
+    label: "Language",
+    auto: "Follow browser",
+  },
+  workspace: {
+    title: "Workspace",
+    chooseTool: "Tools",
+    tools_one: "{{count}} tool",
+    tools_other: "{{count}} tools",
+  },
+  tools: {},
+  formats: {
+    auto: "Auto",
+    seconds: "Seconds (s)",
+    milliseconds: "Milliseconds (ms)",
+    nanoseconds: "Nanoseconds (ns)",
+    date: "Date / time",
+    iso: "ISO 8601 (UTC)",
+    json: "JSON",
+    yaml: "YAML",
+    structured: "Structured",
+    text: "Text",
+  },
+  runner: {
+    inputFormat: "Input format",
+    outputFormat: "Output format",
+    yamlOutput: "Output YAML",
+    diffMode: "Comparison mode",
+    after: "After",
+    afterPlaceholder: "Updated JSON, YAML, or text",
+    noDifferences: "No differences",
+    timeNote:
+      "Empty = now · Auto guesses s / ms / ns by magnitude · Dates without a timezone use your local timezone",
+    jwtWarning: "Decoded only. Signature not verified.",
+    uuidNote: "Generates a secure UUID v4. Input is ignored.",
+    urlNote:
+      "HTTP/HTTPS only · query values are strings or arrays · URL normalization applies",
+    local: "Local execution · Web Worker",
+    indent: "Indent",
+    spaces_one: "{{count}} space",
+    spaces_other: "{{count}} spaces",
+    run: "Run",
+    cancel: "Cancel",
+    cancelLabel: "Cancel run",
+    outputPlaceholder: "Run the tool to see the result",
+    privacy: "Input and results stay on this page only",
+    ready: "Ready",
+    running: "Running…",
+    completed: "Completed · {{duration}} ms",
+    cancelled: "Cancelled · {{duration}} ms",
+    failed: "Failed · {{duration}} ms",
+  },
+  errors: {
+    UNKNOWN_TOOL: "This tool could not be found.",
+    EXECUTION_FAILED:
+      "Local execution failed. Try again with smaller or less deeply nested input.",
+    CANCELLED: "Execution cancelled.",
+  },
+};
+
+export type Translations = typeof en;

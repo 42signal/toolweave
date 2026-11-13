@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.use({ locale: "zh-CN" });
+
 test("[E-00] 生产页面打开及刷新后工作区可用且资源无错误", async ({ page }) => {
   const errors: string[] = [];
   const origin = "http://127.0.0.1:4173";

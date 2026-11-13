@@ -13,6 +13,8 @@
   --border: #2c3830;
   --accent: #8ddb9b;
   --accent-surface: #19291e;
+  --error: #f5a398;
+  --editor: #0c100d;
 }
 
 * {
@@ -39,6 +41,7 @@ body {
 
 .app-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -56,6 +59,14 @@ h1 {
   font-weight: 500;
   line-height: 1.5;
   letter-spacing: -0.03em;
+  white-space: nowrap;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-inline-start: auto;
 }
 
 .prompt {
@@ -104,28 +115,48 @@ h2 {
   line-height: 1.5;
 }
 
-.empty-workspace {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  min-height: 24rem;
-  padding: 2rem;
-  color: var(--muted);
-}
-
-.empty-symbol {
-  color: var(--accent);
-  font-size: 2rem;
-  line-height: 1;
-}
-
-.empty-workspace p {
+h3 {
   margin: 0;
-  font-size: 0.8125rem;
-  line-height: 1.75;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+button,
+select,
+textarea {
+  font: inherit;
+  color: var(--foreground);
+  background: var(--editor);
+  border: 1px solid var(--border);
+  border-radius: 0;
+}
+
+button,
+select {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.75rem;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover:not(:disabled),
+select:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+button:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 @media (max-width: 40rem) {

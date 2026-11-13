@@ -1,4 +1,10 @@
+import { useTranslation } from "react-i18next";
+import "./i18n";
+import { useBrowserLanguage } from "./i18n/use-browser-language";
+
 export function App() {
+  const { t } = useTranslation();
+  const language = useBrowserLanguage();
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -8,20 +14,34 @@ export function App() {
           </span>
           Toolweave AI
         </h1>
-        <span className="workspace-path" aria-hidden="true">
-          ~/workspace
-        </span>
+        <div className="header-actions">
+          <span className="workspace-path" aria-hidden="true">
+            ~/workspace
+          </span>
+          <select
+            className="language-select"
+            aria-label={t("language.label")}
+            value={language.preference}
+            onChange={(event) =>
+              language.setPreference(event.currentTarget.value)
+            }
+          >
+            <option value="auto">{t("language.auto")}</option>
+            <option value="en" lang="en">
+              English
+            </option>
+            <option value="zh-CN" lang="zh-CN">
+              简体中文
+            </option>
+          </select>
+        </div>
       </header>
       <main aria-labelledby="workspace-heading">
         <div className="workspace-header">
-          <h2 id="workspace-heading">工作区</h2>
-          <span className="tool-count">0 tools</span>
-        </div>
-        <div className="empty-workspace">
-          <span className="empty-symbol" aria-hidden="true">
-            [ ]
+          <h2 id="workspace-heading">{t("workspace.title")}</h2>
+          <span className="tool-count">
+            {t("workspace.tools", { count: 0 })}
           </span>
-          <p>尚未添加工具</p>
         </div>
       </main>
     </div>
