@@ -48,6 +48,15 @@ export const zhCN: Translations = {
       invalidInput: "请输入有效的标准 Base64 和 UTF-8 文本。",
       invalidConfig: "此工具没有可配置选项。",
     },
+    "url.encode": {
+      name: "URL 编码",
+      description: "编码 URI 组件。",
+      input: "输入文本",
+      output: "输出编码文本",
+      placeholder: "hello world",
+      invalidInput: "请输入有效的 Unicode 文本，不能包含不完整字符。",
+      invalidConfig: "此工具没有可配置选项。",
+    },
   },
   formats: {
     auto: "自动识别",

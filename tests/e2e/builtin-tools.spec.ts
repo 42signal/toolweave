@@ -23,7 +23,7 @@ for (const language of ["en", "zh"] as const) {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto("/");
       await expect(
-        page.getByText(chinese ? "4 个工具" : "4 tools", { exact: true }),
+        page.getByText(chinese ? "5 个工具" : "5 tools", { exact: true }),
       ).toBeVisible();
       const vectors = [
         {
@@ -53,6 +53,13 @@ for (const language of ["en", "zh"] as const) {
           outputs: ["Output text", "输出文本"],
           input: "5L2g5aW98J+YgA==",
           output: "你好😀",
+        },
+        {
+          names: ["URL Encoder", "URL 编码"],
+          inputs: ["Input text", "输入文本"],
+          outputs: ["Output encoded text", "输出编码文本"],
+          input: "a b+中",
+          output: "a%20b%2B%E4%B8%AD",
         },
       ] as const;
       for (const vector of vectors) {
@@ -130,6 +137,11 @@ test.describe("edge cases", () => {
     for (const scenario of [
       { tool: "Base64 Encoder", input: "Input text", output: "Output Base64" },
       { tool: "Base64 Decoder", input: "Input Base64", output: "Output text" },
+      {
+        tool: "URL Encoder",
+        input: "Input text",
+        output: "Output encoded text",
+      },
     ]) {
       await page
         .getByRole("button", { name: scenario.tool, exact: true })

@@ -48,6 +48,15 @@ export const en = {
       invalidInput: "Enter valid standard Base64 containing UTF-8 text.",
       invalidConfig: "This tool has no configurable options.",
     },
+    "url.encode": {
+      name: "URL Encoder",
+      description: "Encode a URI component.",
+      input: "Input text",
+      output: "Output encoded text",
+      placeholder: "hello world",
+      invalidInput: "Enter valid Unicode text without incomplete characters.",
+      invalidConfig: "This tool has no configurable options.",
+    },
   },
   formats: {
     auto: "Auto",

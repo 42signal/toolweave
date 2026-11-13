@@ -85,7 +85,7 @@ test("[UI-02] 用户可以取消，卸载释放正在运行的 Worker", async ()
 
 test("[UI-02] 切换工具保留输入并清除旧结果，压缩不带缩进配置", async () => {
   render(<App />);
-  expect(screen.getByText("4 个工具")).toBeVisible();
+  expect(screen.getByText("5 个工具")).toBeVisible();
   fireEvent.change(screen.getByLabelText("输入 JSON / YAML"), {
     target: { value: '{\n  "x": 1\n}' },
   });
