@@ -98,6 +98,7 @@ for (const toolId of [
   "jwt.decode",
   "uuid.generate",
   "url.parse",
+  "url.build",
 ]) {
   test.each([null, { extra: true }])(
     `[CT-03] ${toolId} 不接受额外或非对象配置：%j`,
@@ -214,6 +215,15 @@ test("[BT-06] URL 解析保留重复参数顺序并明确解码 +", () => {
   });
 });
 
+test("[BT-06] URL 构造自动编码参数并保序", () => {
+  expect(
+    executeTool({ toolId: "url.build", input: urlJSON, config: {} }),
+  ).toMatchObject({
+    ok: true,
+    output: "https://example.com:8080/search?q=hello+world&tag=a&tag=b#results",
+  });
+});
+
 test("[BT-06] IPv6、空 query 和编码后的路径/片段保留", () => {
   expect(
     executeTool({
@@ -237,6 +247,24 @@ test.each([
   "not-a-url",
 ])("[BT-06] URL 解析不支持或坏编码拒绝：%j", (input) => {
   expect(executeTool({ toolId: "url.parse", input, config: {} })).toMatchObject(
+    { ok: false, error: { code: "INVALID_INPUT" } },
+  );
+});
+
+test.each([
+  "{",
+  "null",
+  "[]",
+  "{}",
+  '{"protocol":"https:","host":"example.com","pathname":"/","query":{"q":1},"hash":""}',
+  '{"protocol":"https:","host":"example.com/path","pathname":"/","query":[],"hash":""}',
+  '{"protocol":"https:","host":"example.com","pathname":"relative","query":[],"hash":""}',
+  '{"protocol":"https:","host":"example.com","pathname":"/","query":[["a",1]],"hash":""}',
+  '{"protocol":"https:","host":"example.com","pathname":"/","query":[["a","b","c"]],"hash":""}',
+  '{"protocol":"https:","host":"example.com","pathname":"/","query":[],"hash":"x"}',
+  '{"protocol":"https:","host":"example.com","pathname":"/","query":[],"hash":"","extra":1}',
+])("[BT-06] URL JSON 坏结构和未知字段不静默丢弃：%j", (input) => {
+  expect(executeTool({ toolId: "url.build", input, config: {} })).toMatchObject(
     { ok: false, error: { code: "INVALID_INPUT" } },
   );
 });

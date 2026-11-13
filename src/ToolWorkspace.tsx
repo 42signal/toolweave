@@ -120,7 +120,7 @@ export function ToolWorkspace() {
       {selectedTool.id === "uuid.generate" && (
         <p className="tool-note">{t("runner.uuidNote")}</p>
       )}
-      {selectedTool.id === "url.parse" && (
+      {(selectedTool.id === "url.parse" || selectedTool.id === "url.build") && (
         <p className="tool-note">{t("runner.urlNote")}</p>
       )}
       {selectedTool.id === "unix-time.convert" && (

@@ -26,7 +26,7 @@ for (const language of ["en", "zh"] as const) {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto("/");
       await expect(
-        page.getByText(chinese ? "10 个工具" : "10 tools", { exact: true }),
+        page.getByText(chinese ? "11 个工具" : "11 tools", { exact: true }),
       ).toBeVisible();
       const vectors = [
         {
@@ -101,6 +101,14 @@ for (const language of ["en", "zh"] as const) {
           input:
             "https://example.com:8080/search?q=hello+world&tag=a&tag=b#results",
           output: parsedURL,
+        },
+        {
+          names: ["JSON to URL", "JSON 转 URL"],
+          inputs: ["Input JSON", "输入 JSON"],
+          outputs: ["Output URL", "输出 URL"],
+          input: parsedURL,
+          output:
+            "https://example.com:8080/search?q=hello+world&tag=a&tag=b#results",
         },
       ] as const;
       for (const vector of vectors) {
@@ -243,6 +251,17 @@ test.describe("edge cases", () => {
           '{\n  "protocol": "https:",\n  "host": "example.com",\n  "pathname": "/",\n  "query": {},\n  "hash": ""\n}',
         message: "Enter an absolute HTTP or HTTPS URL without credentials.",
       },
+      {
+        tool: "JSON to URL",
+        inputLabel: "Input JSON",
+        outputLabel: "Output URL",
+        invalid: '{"private-sentinel":1}',
+        valid:
+          '{"protocol":"https:","host":"example.com","pathname":"/","query":[],"hash":""}',
+        output: "https://example.com/",
+        message:
+          "Enter URL JSON with protocol, host, pathname, query strings or arrays, and hash.",
+      },
     ]) {
       await page
         .getByRole("button", { name: scenario.tool, exact: true })
@@ -292,5 +311,44 @@ test.describe("edge cases", () => {
       ).toHaveValue("");
       await expect(page.getByRole("alert")).toHaveCount(0);
     }
+  });
+
+  test("[ALL-E03] URL query 重复和空值不丢失，切换语言保留结果", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page
+      .getByRole("button", { name: "URL to JSON", exact: true })
+      .click();
+    await page
+      .getByLabel("Input URL", { exact: true })
+      .fill("https://example.com/?a=1&a=2&empty=&=x");
+    await page.getByRole("button", { name: "Run", exact: true }).click();
+    await expect(page.getByLabel("Output JSON", { exact: true })).toHaveValue(
+      '{\n  "protocol": "https:",\n  "host": "example.com",\n  "pathname": "/",\n  "query": {\n    "a": [\n      "1",\n      "2"\n    ],\n    "empty": "",\n    "": "x"\n  },\n  "hash": ""\n}',
+    );
+    await page
+      .getByRole("button", { name: "JSON to URL", exact: true })
+      .click();
+    await expect(page.getByLabel("Input JSON", { exact: true })).toHaveValue(
+      "https://example.com/?a=1&a=2&empty=&=x",
+    );
+    await expect(page.getByLabel("Output URL", { exact: true })).toHaveValue(
+      "",
+    );
+    await page.getByLabel("Input JSON", { exact: true }).fill(parsedURL);
+    await page.getByRole("button", { name: "Run", exact: true }).click();
+    await expect(page.getByLabel("Output URL", { exact: true })).toHaveValue(
+      "https://example.com:8080/search?q=hello+world&tag=a&tag=b#results",
+    );
+    await page
+      .getByRole("combobox", { name: "Language" })
+      .selectOption("zh-CN");
+    await expect(
+      page.getByRole("button", { name: "JSON 转 URL", exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByLabel("输出 URL", { exact: true })).toHaveValue(
+      "https://example.com:8080/search?q=hello+world&tag=a&tag=b#results",
+    );
   });
 });

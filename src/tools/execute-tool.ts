@@ -3,7 +3,7 @@ import { minify } from "./minify";
 import { isRecord } from "./protocol";
 import type { ToolResult } from "./protocol";
 import { decodeBase64, decodeJWT, encodeBase64 } from "./text-tools";
-import { parseURL } from "./url-tools";
+import { buildURL, parseURL } from "./url-tools";
 import { convertTime } from "./unix-time";
 
 const textTools: Record<string, (input: string) => string> = {
@@ -14,6 +14,7 @@ const textTools: Record<string, (input: string) => string> = {
   "jwt.decode": decodeJWT,
   "uuid.generate": () => crypto.randomUUID(),
   "url.parse": parseURL,
+  "url.build": buildURL,
 };
 
 export function executeTool(request: unknown): ToolResult {

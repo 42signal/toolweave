@@ -104,6 +104,17 @@ export const en = {
       invalidInput: "Enter an absolute HTTP or HTTPS URL without credentials.",
       invalidConfig: "This tool has no configurable options.",
     },
+    "url.build": {
+      name: "JSON to URL",
+      description: "Build an HTTP URL from JSON components.",
+      input: "Input JSON",
+      output: "Output URL",
+      placeholder:
+        '{"protocol":"https:","host":"example.com","pathname":"/","query":{"q":"hello world"},"hash":""}',
+      invalidInput:
+        "Enter URL JSON with protocol, host, pathname, query strings or arrays, and hash.",
+      invalidConfig: "This tool has no configurable options.",
+    },
   },
   formats: {
     auto: "Auto",

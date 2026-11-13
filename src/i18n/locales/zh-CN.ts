@@ -102,6 +102,17 @@ export const zhCN: Translations = {
       invalidInput: "请输入不含凭据的完整 HTTP 或 HTTPS URL。",
       invalidConfig: "此工具没有可配置选项。",
     },
+    "url.build": {
+      name: "JSON 转 URL",
+      description: "通过 JSON 组件构造 HTTP URL。",
+      input: "输入 JSON",
+      output: "输出 URL",
+      placeholder:
+        '{"protocol":"https:","host":"example.com","pathname":"/","query":{"q":"hello world"},"hash":""}',
+      invalidInput:
+        "请输入包含 protocol、host、pathname、query 字符串或数组值和 hash 的 URL JSON。",
+      invalidConfig: "此工具没有可配置选项。",
+    },
   },
   formats: {
     auto: "自动识别",

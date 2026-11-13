@@ -128,4 +128,10 @@ export const builtinTools = [
     "URL",
     "Parse an HTTP URL into editable components.",
   ),
+  builtin(
+    "url.build",
+    "JSON to URL",
+    "URL",
+    "Build an HTTP URL from JSON components.",
+  ),
 ];
