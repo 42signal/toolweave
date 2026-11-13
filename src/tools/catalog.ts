@@ -1,4 +1,9 @@
-import { dataInputFormats, dataOutputFormats } from "./formats";
+import {
+  dataInputFormats,
+  dataOutputFormats,
+  timeInputFormats,
+  timeOutputFormats,
+} from "./formats";
 
 export const formatManifest = {
   id: "format",
@@ -93,4 +98,28 @@ export const builtinTools = [
     "Identifiers",
     "Generate a cryptographically random UUID v4.",
   ),
+  {
+    ...builtin(
+      "unix-time.convert",
+      "Unix Time Converter",
+      "Time",
+      "Detect timestamps and dates and convert with nanosecond precision.",
+    ),
+    configSchema: {
+      type: "object",
+      properties: {
+        inputFormat: {
+          type: "string",
+          enum: timeInputFormats,
+          default: "auto",
+        },
+        outputFormat: {
+          type: "string",
+          enum: timeOutputFormats,
+          default: "seconds",
+        },
+      },
+      additionalProperties: false,
+    },
+  },
 ];

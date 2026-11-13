@@ -84,6 +84,17 @@ export const en = {
       invalidInput: "UUID generation failed. Try again.",
       invalidConfig: "This tool has no configurable options.",
     },
+    "unix-time.convert": {
+      name: "Unix Time Converter",
+      description:
+        "Detect timestamps and dates and convert with nanosecond precision.",
+      input: "Input time",
+      output: "Output time",
+      placeholder: "Leave empty for now · 1700000000 · 2024-01-01 12:00",
+      invalidInput:
+        "Enter a valid timestamp or supported date. Check the input format and timezone.",
+      invalidConfig: "Choose supported input and output formats.",
+    },
   },
   formats: {
     auto: "Auto",

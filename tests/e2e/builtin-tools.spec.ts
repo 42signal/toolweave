@@ -23,7 +23,7 @@ for (const language of ["en", "zh"] as const) {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto("/");
       await expect(
-        page.getByText(chinese ? "8 个工具" : "8 tools", { exact: true }),
+        page.getByText(chinese ? "9 个工具" : "9 tools", { exact: true }),
       ).toBeVisible();
       const vectors = [
         {
@@ -84,6 +84,13 @@ for (const language of ["en", "zh"] as const) {
           output:
             /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
         },
+        {
+          names: ["Unix Time Converter", "Unix 时间转换"],
+          inputs: ["Input time", "输入时间"],
+          outputs: ["Output time", "输出时间"],
+          input: "0",
+          output: "0",
+        },
       ] as const;
       for (const vector of vectors) {
         const name = vector.names[index];
@@ -123,6 +130,46 @@ for (const language of ["en", "zh"] as const) {
           { exact: true },
         ),
       ).toBeVisible();
+      await page
+        .getByRole("button", {
+          name: chinese ? "Unix 时间转换" : "Unix Time Converter",
+          exact: true,
+        })
+        .click();
+      for (const vector of [
+        {
+          inputFormat: "milliseconds",
+          outputFormat: "iso",
+          input: "1001",
+          output: "1970-01-01T00:00:01.001Z",
+        },
+        {
+          inputFormat: "date",
+          outputFormat: "seconds",
+          input: "1970-01-01T08:00:00+08:00",
+          output: "0",
+        },
+        {
+          inputFormat: "date",
+          outputFormat: "milliseconds",
+          input: "1970-01-01T00:00:01.001Z",
+          output: "1001",
+        },
+      ]) {
+        await page
+          .getByLabel(chinese ? "输入格式" : "Input format")
+          .selectOption(vector.inputFormat);
+        await page
+          .getByLabel(chinese ? "输出格式" : "Output format")
+          .selectOption(vector.outputFormat);
+        await page
+          .getByLabel(chinese ? "输入时间" : "Input time")
+          .fill(vector.input);
+        await page.getByRole("button", { name: run, exact: true }).click();
+        await expect(
+          page.getByLabel(chinese ? "输出时间" : "Output time"),
+        ).toHaveValue(vector.output);
+      }
       expect(
         await page.evaluate(() => document.documentElement.scrollWidth),
       ).toBe(375);
@@ -164,6 +211,16 @@ test.describe("edge cases", () => {
         valid: "e30.e30.",
         output: '{\n  "header": {},\n  "payload": {}\n}',
         message: "Enter a three-part JWT with JSON header and payload.",
+      },
+      {
+        tool: "Unix Time Converter",
+        inputLabel: "Input time",
+        outputLabel: "Output time",
+        invalid: "private-sentinel",
+        valid: "0",
+        output: "0",
+        message:
+          "Enter a valid timestamp or supported date. Check the input format and timezone.",
       },
     ]) {
       await page

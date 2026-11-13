@@ -84,6 +84,15 @@ export const zhCN: Translations = {
       invalidInput: "UUID 生成失败，请重试。",
       invalidConfig: "此工具没有可配置选项。",
     },
+    "unix-time.convert": {
+      name: "Unix 时间转换",
+      description: "自动识别时间戳与日期，保留纳秒精度转换。",
+      input: "输入时间",
+      output: "输出时间",
+      placeholder: "留空使用当前时间 · 1700000000 · 2024-01-01 12:00",
+      invalidInput: "请输入有效时间戳或支持的日期，请检查输入格式和时区。",
+      invalidConfig: "请选择支持的输入和输出格式。",
+    },
   },
   formats: {
     auto: "自动识别",

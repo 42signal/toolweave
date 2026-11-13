@@ -4,7 +4,12 @@ import { useTranslation } from "react-i18next";
 import { builtinTools, formatManifest } from "./tools/catalog";
 import { startTool } from "./tools/start-tool";
 import type { ToolResult, ToolRun } from "./tools/protocol";
-import { dataInputFormats, dataOutputFormats } from "./tools/formats";
+import {
+  dataInputFormats,
+  dataOutputFormats,
+  timeInputFormats,
+  timeOutputFormats,
+} from "./tools/formats";
 
 export function ToolWorkspace() {
   const { t, i18n } = useTranslation();
@@ -12,6 +17,8 @@ export function ToolWorkspace() {
     useState<(typeof builtinTools)[number]>(formatManifest);
   const [input, setInput] = useState("");
   const [indent, setIndent] = useState("2");
+  const [timeInputFormat, setTimeInputFormat] = useState("auto");
+  const [timeOutputFormat, setTimeOutputFormat] = useState("seconds");
   const [dataInputFormat, setDataInputFormat] = useState("auto");
   const [dataOutputFormat, setDataOutputFormat] = useState("json");
   const [result, setResult] = useState<ToolResult | null>(null);
@@ -43,7 +50,9 @@ export function ToolWorkspace() {
             }
           : selectedTool.id === "minify"
             ? { inputFormat: dataInputFormat }
-            : {},
+            : selectedTool.id === "unix-time.convert"
+              ? { inputFormat: timeInputFormat, outputFormat: timeOutputFormat }
+              : {},
     });
     activeRun.current = task;
     void task.result.then((nextResult) => {
@@ -112,6 +121,9 @@ export function ToolWorkspace() {
         <p className="tool-note">{t("runner.uuidNote")}</p>
       )}
 
+      {selectedTool.id === "unix-time.convert" && (
+        <p className="tool-note">{t("runner.timeNote")}</p>
+      )}
       <form onSubmit={run}>
         <div className="tool-toolbar">
           {structured && (
@@ -170,6 +182,44 @@ export function ToolWorkspace() {
                 ))}
               </select>
             </label>
+          )}
+          {selectedTool.id === "unix-time.convert" && (
+            <>
+              <label className="indent-control">
+                {t("runner.inputFormat")}
+                <select
+                  value={timeInputFormat}
+                  disabled={running}
+                  onChange={(event) => {
+                    setTimeInputFormat(event.currentTarget.value);
+                    setResult(null);
+                  }}
+                >
+                  {timeInputFormats.map((format) => (
+                    <option key={format} value={format}>
+                      {t(`formats.${format}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="indent-control">
+                {t("runner.outputFormat")}
+                <select
+                  value={timeOutputFormat}
+                  disabled={running}
+                  onChange={(event) => {
+                    setTimeOutputFormat(event.currentTarget.value);
+                    setResult(null);
+                  }}
+                >
+                  {timeOutputFormats.map((format) => (
+                    <option key={format} value={format}>
+                      {t(`formats.${format}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
           )}
 
           <div className="run-actions">

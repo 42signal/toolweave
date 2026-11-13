@@ -85,7 +85,7 @@ test("[UI-02] 用户可以取消，卸载释放正在运行的 Worker", async ()
 
 test("[UI-02] 切换工具保留输入并清除旧结果，压缩不带缩进配置", async () => {
   render(<App />);
-  expect(screen.getByText("8 个工具")).toBeVisible();
+  expect(screen.getByText("9 个工具")).toBeVisible();
   fireEvent.change(screen.getByLabelText("输入 JSON / YAML"), {
     target: { value: '{\n  "x": 1\n}' },
   });
@@ -130,6 +130,38 @@ test("[UI-02] 切换工具保留输入并清除旧结果，压缩不带缩进配
   expect(screen.getByLabelText("输入 JSON / YAML")).toHaveValue(
     '{\n  "x": 1\n}',
   );
+});
+
+test("[UI-03] 独立时间格式提交、运行中禁改配置，编辑后清结果", async () => {
+  render(<App />);
+  fireEvent.click(screen.getByRole("button", { name: "Unix 时间转换" }));
+  expect(screen.getByLabelText("输入格式")).toHaveValue("auto");
+  expect(screen.getByLabelText("输出格式")).toHaveValue("seconds");
+  fireEvent.change(screen.getByLabelText("输出格式"), {
+    target: { value: "milliseconds" },
+  });
+  fireEvent.change(screen.getByLabelText("输入时间"), {
+    target: { value: "1970-01-01T00:00:00Z" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "运行" }));
+  expect(latestWorker().requests).toEqual([
+    {
+      toolId: "unix-time.convert",
+      input: "1970-01-01T00:00:00Z",
+      config: { inputFormat: "auto", outputFormat: "milliseconds" },
+    },
+  ]);
+  expect(screen.getByLabelText("输入格式")).toBeDisabled();
+  expect(screen.getByLabelText("输出格式")).toBeDisabled();
+  latestWorker().respond({ ok: true, output: "0", durationMs: 1 });
+  await waitFor(() =>
+    expect(screen.getByLabelText("输出时间")).toHaveValue("0"),
+  );
+  fireEvent.change(screen.getByLabelText("输入格式"), {
+    target: { value: "seconds" },
+  });
+  expect(screen.getByLabelText("输出时间")).toHaveValue("");
+  expect(screen.getByRole("status")).toHaveTextContent("等待运行");
 });
 
 test("[UI-02] Base64 空输出仍为成功，错误不再显示 JSON 说明", async () => {

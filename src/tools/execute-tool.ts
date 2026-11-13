@@ -3,6 +3,7 @@ import { minify } from "./minify";
 import { isRecord } from "./protocol";
 import type { ToolResult } from "./protocol";
 import { decodeBase64, decodeJWT, encodeBase64 } from "./text-tools";
+import { convertTime } from "./unix-time";
 
 const textTools: Record<string, (input: string) => string> = {
   "base64.encode": encodeBase64,
@@ -32,7 +33,11 @@ export function executeTool(request: unknown): ToolResult {
       : request.toolId === "minify"
         ? minify
         : null;
-  if (!tool && !Object.hasOwn(textTools, request.toolId)) {
+  if (
+    !tool &&
+    request.toolId !== "unix-time.convert" &&
+    !Object.hasOwn(textTools, request.toolId)
+  ) {
     return {
       ok: false,
       error: { code: "UNKNOWN_TOOL", message: "Tool not found" },
@@ -45,6 +50,11 @@ export function executeTool(request: unknown): ToolResult {
     if (tool)
       return {
         ...tool.run(request.input, request.config),
+        durationMs: performance.now() - startedAt,
+      };
+    if (request.toolId === "unix-time.convert")
+      return {
+        ...convertTime(request.input, request.config),
         durationMs: performance.now() - startedAt,
       };
     if (!isRecord(request.config) || Object.keys(request.config).length !== 0)
