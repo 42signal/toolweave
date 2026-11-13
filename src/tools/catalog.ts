@@ -75,4 +75,10 @@ export const builtinTools = [
     "Decode standard Base64 as UTF-8 text.",
   ),
   builtin("url.encode", "URL Encoder", "URL", "Encode a URI component."),
+  builtin(
+    "url.decode",
+    "URL Decoder",
+    "URL",
+    "Decode a URI component; + stays +.",
+  ),
 ];

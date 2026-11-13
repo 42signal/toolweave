@@ -8,6 +8,7 @@ const textTools: Record<string, (input: string) => string> = {
   "base64.encode": encodeBase64,
   "base64.decode": decodeBase64,
   "url.encode": encodeURIComponent,
+  "url.decode": decodeURIComponent,
 };
 
 export function executeTool(request: unknown): ToolResult {

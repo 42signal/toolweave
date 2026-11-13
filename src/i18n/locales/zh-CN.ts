@@ -57,6 +57,15 @@ export const zhCN: Translations = {
       invalidInput: "请输入有效的 Unicode 文本，不能包含不完整字符。",
       invalidConfig: "此工具没有可配置选项。",
     },
+    "url.decode": {
+      name: "URL 解码",
+      description: "解码 URI 组件，+ 保持不变。",
+      input: "输入编码文本",
+      output: "输出文本",
+      placeholder: "hello%20world",
+      invalidInput: "请输入有效的百分号编码 UTF-8 文本。",
+      invalidConfig: "此工具没有可配置选项。",
+    },
   },
   formats: {
     auto: "自动识别",

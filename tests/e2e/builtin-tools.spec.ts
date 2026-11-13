@@ -23,7 +23,7 @@ for (const language of ["en", "zh"] as const) {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto("/");
       await expect(
-        page.getByText(chinese ? "5 个工具" : "5 tools", { exact: true }),
+        page.getByText(chinese ? "6 个工具" : "6 tools", { exact: true }),
       ).toBeVisible();
       const vectors = [
         {
@@ -60,6 +60,13 @@ for (const language of ["en", "zh"] as const) {
           outputs: ["Output encoded text", "输出编码文本"],
           input: "a b+中",
           output: "a%20b%2B%E4%B8%AD",
+        },
+        {
+          names: ["URL Decoder", "URL 解码"],
+          inputs: ["Input encoded text", "输入编码文本"],
+          outputs: ["Output text", "输出文本"],
+          input: "a%20b+%E4%B8%AD",
+          output: "a b+中",
         },
       ] as const;
       for (const vector of vectors) {
@@ -110,6 +117,15 @@ test.describe("edge cases", () => {
         output: "hi",
         message: "Enter valid standard Base64 containing UTF-8 text.",
       },
+      {
+        tool: "URL Decoder",
+        inputLabel: "Input encoded text",
+        outputLabel: "Output text",
+        invalid: "%ZZprivate-sentinel",
+        valid: "a%20b",
+        output: "a b",
+        message: "Enter valid percent-encoded UTF-8 text.",
+      },
     ]) {
       await page
         .getByRole("button", { name: scenario.tool, exact: true })
@@ -141,6 +157,11 @@ test.describe("edge cases", () => {
         tool: "URL Encoder",
         input: "Input text",
         output: "Output encoded text",
+      },
+      {
+        tool: "URL Decoder",
+        input: "Input encoded text",
+        output: "Output text",
       },
     ]) {
       await page

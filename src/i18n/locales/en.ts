@@ -57,6 +57,15 @@ export const en = {
       invalidInput: "Enter valid Unicode text without incomplete characters.",
       invalidConfig: "This tool has no configurable options.",
     },
+    "url.decode": {
+      name: "URL Decoder",
+      description: "Decode a URI component; + stays +.",
+      input: "Input encoded text",
+      output: "Output text",
+      placeholder: "hello%20world",
+      invalidInput: "Enter valid percent-encoded UTF-8 text.",
+      invalidConfig: "This tool has no configurable options.",
+    },
   },
   formats: {
     auto: "Auto",

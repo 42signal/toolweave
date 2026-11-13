@@ -46,7 +46,12 @@ test("[BT-02] 编码不静默替换孤立 surrogate", () => {
   });
 });
 
-for (const toolId of ["base64.encode", "base64.decode", "url.encode"]) {
+for (const toolId of [
+  "base64.encode",
+  "base64.decode",
+  "url.encode",
+  "url.decode",
+]) {
   test.each([null, { extra: true }])(
     `[CT-03] ${toolId} 不接受额外或非对象配置：%j`,
     (config) => {
