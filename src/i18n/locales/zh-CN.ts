@@ -137,6 +137,7 @@ export const zhCN: Translations = {
     text: "文本",
   },
   runner: {
+    updating: "正在更新预览…",
     inputFormat: "输入格式",
     outputFormat: "输出格式",
     yamlOutput: "输出 YAML",

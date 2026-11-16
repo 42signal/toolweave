@@ -139,6 +139,7 @@ export const en = {
     text: "Text",
   },
   runner: {
+    updating: "Updating preview…",
     inputFormat: "Input format",
     outputFormat: "Output format",
     yamlOutput: "Output YAML",

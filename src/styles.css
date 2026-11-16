@@ -257,6 +257,10 @@ textarea:disabled {
   border-top: 0;
 }
 
+.live-panels {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+
 .diff-result textarea {
   min-height: 12rem;
 }

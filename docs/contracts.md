@@ -56,6 +56,26 @@ type ToolResult =
 | `url.parse` / `url.build`         | URL 与 JSON 双向转换 | 五字段，query 对象单值/数组，生成兼容旧二元组；空配置                                   |
 | `diff.compare`                    | 结构化/文本 Diff     | `mode=auto/structured/text`，默认 auto；字符串 envelope 双输入                          |
 
+### 工具界面注册（已实现）
+
+界面类型在 `src/tools/ui.ts`，内置工具接线在 `src/tools/ui-registry.ts`；均为运行时代码，不写入可序列化 manifest。
+
+```tsx
+const custom = {
+  ui: { kind: "panels", Input: CustomInput, Output: CustomOutput },
+  execution: { kind: "live", debounceMs: 150, localized: true },
+};
+const diff = {
+  ui: { kind: "workspace", Workspace: DiffWorkspace },
+};
+```
+
+- 默认手动执行、标准文本输入/输出。`panels` 可分别提供 Input / Output，缺哪侧只回退哪侧；`workspace` 替换整个内容区，与 Input / Output 在类型上互斥。
+- Input 接收宿主管理的 `input`、`config`、`disabled` 及变更回调；Output 仅接收结果。Workspace 额外接收 `running`、宿主 `run()` / `cancel()`，不能自行创建 Worker。配置控件通过可选 `Controls` 注册，不要求在宿主按工具 ID 分支。
+- 宿主统一管理执行、防抖、取消、错误/耗时、编辑清除结果和卸载清理；旧任务结果不能覆盖新输入。手动运行中禁止编辑/切换工具；live 允许编辑/切换并终止旧任务，空输入不执行。`localized` 将当前英中语言加入执行配置，手动工具切换语言不重跑。
+- 工具切换保留共享文本输入和各工具配置，清除输出/错误/耗时。Diff 的 `sharedInput` 适配只同步 envelope 的 before，保留该页面的 after；不改变 Worker 的单字符串输入协议。
+- 工具导航、标题、语言、隐私和运行状态属于宿主；自定义视图只能占内容区。当前仅支持可信内置 React 视图，不开放社区/AI 代码运行于宿主，也未实现动态 manifest 注册或通用 Schema 表单。
+
 ## 2. 线性工作流
 
 工作流是有序步骤数组，不是 DAG。第一步接收用户输入，后续步骤接收前一步字符串输出；全部成功时返回最后一步输出。

@@ -1,97 +1,22 @@
-import { useEffect, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { builtinTools, formatManifest } from "./tools/catalog";
-import { startTool } from "./tools/start-tool";
-import type { ToolResult, ToolRun } from "./tools/protocol";
-import {
-  dataInputFormats,
-  dataOutputFormats,
-  diffModes,
-  timeInputFormats,
-  timeOutputFormats,
-} from "./tools/formats";
+import { toolRegistrations } from "./tools/ui-registry";
+import type { ToolConfig, ToolRegistration } from "./tools/ui";
+import { ToolHost } from "./ToolHost";
+
+const emptyRegistration: ToolRegistration = {};
+const emptyConfig = {};
 
 export function ToolWorkspace() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [selectedTool, setSelectedTool] =
     useState<(typeof builtinTools)[number]>(formatManifest);
   const [input, setInput] = useState("");
-  const [indent, setIndent] = useState("2");
-  const [timeInputFormat, setTimeInputFormat] = useState("auto");
-  const [timeOutputFormat, setTimeOutputFormat] = useState("seconds");
-  const [dataInputFormat, setDataInputFormat] = useState("auto");
-  const [dataOutputFormat, setDataOutputFormat] = useState("json");
-  const [diffMode, setDiffMode] = useState("auto");
-  const [after, setAfter] = useState("");
-  const [result, setResult] = useState<ToolResult | null>(null);
-  const [running, setRunning] = useState(false);
-  const activeRun = useRef<ToolRun | null>(null);
-
-  useEffect(
-    () => () => {
-      activeRun.current?.cancel();
-      activeRun.current = null;
-    },
-    [],
-  );
-
-  function run(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (activeRun.current) return;
-    setResult(null);
-    setRunning(true);
-    const task = startTool({
-      toolId: selectedTool.id,
-      input:
-        selectedTool.id === "diff.compare"
-          ? JSON.stringify({ before: input, after })
-          : input,
-      config:
-        selectedTool.id === "format"
-          ? {
-              indent: Number(indent),
-              inputFormat: dataInputFormat,
-              outputFormat: dataOutputFormat,
-            }
-          : selectedTool.id === "minify"
-            ? { inputFormat: dataInputFormat }
-            : selectedTool.id === "unix-time.convert"
-              ? { inputFormat: timeInputFormat, outputFormat: timeOutputFormat }
-              : selectedTool.id === "diff.compare"
-                ? { mode: diffMode }
-                : {},
-    });
-    activeRun.current = task;
-    void task.result.then((nextResult) => {
-      if (activeRun.current !== task) return;
-      activeRun.current = null;
-      setResult(nextResult);
-      setRunning(false);
-    });
-  }
-
-  const cancelled = result?.ok === false && result.error.code === "CANCELLED";
-  const structured =
-    selectedTool.id === "format" || selectedTool.id === "minify";
-  const diff = selectedTool.id === "diff.compare";
-  const status = running
-    ? t("runner.running")
-    : result
-      ? t(
-          result.ok
-            ? "runner.completed"
-            : cancelled
-              ? "runner.cancelled"
-              : "runner.failed",
-          {
-            duration: new Intl.NumberFormat(i18n.resolvedLanguage, {
-              minimumFractionDigits: 1,
-              maximumFractionDigits: 1,
-            }).format(result.durationMs),
-          },
-        )
-      : t("runner.ready");
+  const [inputs, setInputs] = useState<Record<string, string>>({});
+  const [configs, setConfigs] = useState<Record<string, ToolConfig>>({});
+  const [busy, setBusy] = useState(false);
+  const registration = toolRegistrations[selectedTool.id] ?? emptyRegistration;
 
   return (
     <section className="tool-workspace" aria-labelledby="tool-heading">
@@ -105,11 +30,16 @@ export function ToolWorkspace() {
             key={tool.id}
             type="button"
             aria-pressed={selectedTool.id === tool.id}
-            disabled={running}
+            disabled={busy}
             onClick={() => {
               if (selectedTool.id === tool.id) return;
+              const sharedInput = toolRegistrations[tool.id]?.sharedInput;
+              if (sharedInput)
+                setInputs((previous) => ({
+                  ...previous,
+                  [tool.id]: sharedInput.write(input, previous[tool.id]),
+                }));
               setSelectedTool(tool);
-              setResult(null);
             }}
           >
             {t(`tools.${tool.id}.name`)}
@@ -123,243 +53,34 @@ export function ToolWorkspace() {
         </div>
         <span className="execution-location">{t("runner.local")}</span>
       </div>
-      {selectedTool.id === "jwt.decode" && (
-        <p className="tool-note">{t("runner.jwtWarning")}</p>
+      {registration.note && (
+        <p className="tool-note">{t(`runner.${registration.note}`)}</p>
       )}
-      {selectedTool.id === "uuid.generate" && (
-        <p className="tool-note">{t("runner.uuidNote")}</p>
-      )}
-      {(selectedTool.id === "url.parse" || selectedTool.id === "url.build") && (
-        <p className="tool-note">{t("runner.urlNote")}</p>
-      )}
-      {selectedTool.id === "unix-time.convert" && (
-        <p className="tool-note">{t("runner.timeNote")}</p>
-      )}
-      <form onSubmit={run}>
-        <div className="tool-toolbar">
-          {structured && (
-            <label className="indent-control">
-              {t("runner.inputFormat")}
-              <select
-                value={dataInputFormat}
-                disabled={running}
-                onChange={(event) => {
-                  setDataInputFormat(event.currentTarget.value);
-                  setResult(null);
-                }}
-              >
-                {dataInputFormats.map((format) => (
-                  <option key={format} value={format}>
-                    {t(`formats.${format}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {selectedTool.id === "format" && (
-            <label className="indent-control">
-              {t("runner.outputFormat")}
-              <select
-                value={dataOutputFormat}
-                disabled={running}
-                onChange={(event) => {
-                  setDataOutputFormat(event.currentTarget.value);
-                  setResult(null);
-                }}
-              >
-                {dataOutputFormats.map((format) => (
-                  <option key={format} value={format}>
-                    {t(`formats.${format}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {selectedTool.id === "format" && (
-            <label className="indent-control">
-              {t("runner.indent")}
-              <select
-                value={indent}
-                disabled={running}
-                onChange={(event) => {
-                  setIndent(event.target.value);
-                  setResult(null);
-                }}
-              >
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((value) => (
-                  <option key={value} value={value}>
-                    {t("runner.spaces", { count: value })}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {selectedTool.id === "unix-time.convert" && (
-            <>
-              <label className="indent-control">
-                {t("runner.inputFormat")}
-                <select
-                  value={timeInputFormat}
-                  disabled={running}
-                  onChange={(event) => {
-                    setTimeInputFormat(event.currentTarget.value);
-                    setResult(null);
-                  }}
-                >
-                  {timeInputFormats.map((format) => (
-                    <option key={format} value={format}>
-                      {t(`formats.${format}`)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="indent-control">
-                {t("runner.outputFormat")}
-                <select
-                  value={timeOutputFormat}
-                  disabled={running}
-                  onChange={(event) => {
-                    setTimeOutputFormat(event.currentTarget.value);
-                    setResult(null);
-                  }}
-                >
-                  {timeOutputFormats.map((format) => (
-                    <option key={format} value={format}>
-                      {t(`formats.${format}`)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </>
-          )}
-          {diff && (
-            <label className="indent-control">
-              {t("runner.diffMode")}
-              <select
-                value={diffMode}
-                disabled={running}
-                onChange={(event) => {
-                  setDiffMode(event.currentTarget.value);
-                  setResult(null);
-                }}
-              >
-                {diffModes.map((mode) => (
-                  <option key={mode} value={mode}>
-                    {t(`formats.${mode}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <div className="run-actions">
-            {running && (
-              <button
-                type="button"
-                tabIndex={0}
-                aria-label={t("runner.cancelLabel")}
-                onClick={() => activeRun.current?.cancel()}
-              >
-                {t("runner.cancel")}
-              </button>
-            )}
-            <button
-              type="submit"
-              className="run-button"
-              tabIndex={0}
-              disabled={running}
-            >
-              {t("runner.run")}
-              <span aria-hidden="true"> ↵</span>
-            </button>
-          </div>
-        </div>
-        <div className="editor-grid">
-          <div className="editor-pane">
-            <label className="editor-label" htmlFor="json-input">
-              {t(`tools.${selectedTool.id}.input`)}
-            </label>
-            <textarea
-              id="json-input"
-              value={input}
-              disabled={running}
-              spellCheck={false}
-              autoCapitalize="off"
-              autoCorrect="off"
-              placeholder={t(`tools.${selectedTool.id}.placeholder`)}
-              onChange={(event) => {
-                setInput(event.target.value);
-                setResult(null);
-              }}
-            />
-          </div>
-          {diff && (
-            <div className="editor-pane">
-              <label className="editor-label" htmlFor="diff-after">
-                {t("runner.after")}
-              </label>
-              <textarea
-                id="diff-after"
-                value={after}
-                disabled={running}
-                spellCheck={false}
-                autoCapitalize="off"
-                autoCorrect="off"
-                placeholder={t("runner.afterPlaceholder")}
-                onChange={(event) => {
-                  setAfter(event.currentTarget.value);
-                  setResult(null);
-                }}
-              />
-            </div>
-          )}
-          {!diff && (
-            <div className="editor-pane">
-              <label className="editor-label" htmlFor="json-output">
-                {selectedTool.id === "format" && dataOutputFormat === "yaml"
-                  ? t("runner.yamlOutput")
-                  : t(`tools.${selectedTool.id}.output`)}
-              </label>
-              <textarea
-                id="json-output"
-                value={result?.ok ? result.output : ""}
-                readOnly
-                spellCheck={false}
-                placeholder={t("runner.outputPlaceholder")}
-              />
-            </div>
-          )}
-        </div>
-        {diff && (
-          <div className="diff-result editor-pane">
-            <label className="editor-label" htmlFor="diff-output">
-              {t("tools.diff.compare.output")}
-            </label>
-            <textarea
-              id="diff-output"
-              value={result?.ok ? result.output : ""}
-              readOnly
-              spellCheck={false}
-              placeholder={t("runner.outputPlaceholder")}
-            />
-            {result?.ok && (result.output === "" || result.output === "[]") && (
-              <p className="diff-empty">{t("runner.noDifferences")}</p>
-            )}
-          </div>
-        )}
-        <div className="result-bar">
-          <p role="status">{status}</p>
-          <span>{t("runner.privacy")}</span>
-        </div>
-        {result && !result.ok && !cancelled && (
-          <p className="tool-error" role="alert">
-            {result.error.code === "INVALID_INPUT"
-              ? t(`tools.${selectedTool.id}.invalidInput`)
-              : result.error.code === "INVALID_CONFIG"
-                ? t(`tools.${selectedTool.id}.invalidConfig`)
-                : t(`errors.${result.error.code}`)}
-          </p>
-        )}
-      </form>
+      <ToolHost
+        key={selectedTool.id}
+        toolId={selectedTool.id}
+        input={registration.sharedInput ? inputs[selectedTool.id]! : input}
+        config={
+          configs[selectedTool.id] ?? registration.defaultConfig ?? emptyConfig
+        }
+        registration={registration}
+        onInputChange={(value) => {
+          setInput(
+            registration.sharedInput
+              ? registration.sharedInput.read(value)
+              : value,
+          );
+          if (registration.sharedInput)
+            setInputs((previous) => ({
+              ...previous,
+              [selectedTool.id]: value,
+            }));
+        }}
+        onConfigChange={(value) =>
+          setConfigs((previous) => ({ ...previous, [selectedTool.id]: value }))
+        }
+        onBusyChange={setBusy}
+      />
     </section>
   );
 }
