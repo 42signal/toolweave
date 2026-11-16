@@ -1,17 +1,18 @@
 # Toolweave AI
 
-Web-first、local-first 的开发者工具箱。已有 12 个内置工具，均在本地 Web Worker 执行，支持取消、错误恢复、耗时与英中界面。切换工具保留输入、清除旧输出/错误/耗时，运行中禁止切换；输入与结果不上传、不持久化。工作流、PWA、主题切换及 AI 尚未实现。
+Web-first、local-first 的开发者工具箱。已有 13 个内置工具，均在本地 Web Worker 执行，支持取消、错误恢复、耗时与英中界面。切换工具保留输入、清除旧输出/错误/耗时，手动运行中禁止切换，Cron 实时预览允许编辑/切换并取消旧任务；输入与结果不上传、不持久化。工作流、PWA、主题切换及 AI 尚未实现。
 
-| 工具                    | 规则                                                                   |
-| ----------------------- | ---------------------------------------------------------------------- |
-| 格式化 / 压缩           | 通用 `format` / `minify`，当前支持 JSON/YAML；压缩输出紧凑 JSON        |
-| Base64 编码 / 解码      | UTF-8、严格标准 Base64，支持空字符串；不接受缺失填充、空白或 Base64URL |
-| URL 编码 / 解码         | URI component 语义，解码时 `+` 保持不变                                |
-| JWT 解码                | 显示 header / payload；不验证签名或有效期                              |
-| UUID                    | 安全随机 UUID v4，忽略输入                                             |
-| Unix 时间转换           | 自动识别秒/毫秒/纳秒及常见日期；独立输入/输出格式，空输入取当前时间    |
-| URL → JSON / JSON → URL | 绝对 HTTP/HTTPS，无凭据；query 单值字符串、重复值数组，兼容旧数组输入  |
-| Diff                    | 双输入 JSON/YAML 结构化比较（JSON Patch），否则 unified 文本 Diff      |
+| 工具                    | 规则                                                                             |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| 格式化 / 压缩           | 通用 `format` / `minify`，当前支持 JSON/YAML；压缩输出紧凑 JSON                  |
+| Base64 编码 / 解码      | UTF-8、严格标准 Base64，支持空字符串；不接受缺失填充、空白或 Base64URL           |
+| URL 编码 / 解码         | URI component 语义，解码时 `+` 保持不变                                          |
+| JWT 解码                | 显示 header / payload；不验证签名或有效期                                        |
+| UUID                    | 安全随机 UUID v4，忽略输入                                                       |
+| Unix 时间转换           | 自动识别秒/毫秒/纳秒及常见日期；独立输入/输出格式，空输入取当前时间              |
+| URL → JSON / JSON → URL | 绝对 HTTP/HTTPS，无凭据；query 单值字符串、重复值数组，兼容旧数组输入            |
+| Diff                    | 双输入 JSON/YAML 结构化比较（JSON Patch），否则 unified 文本 Diff                |
+| Cron                    | 自定义编辑器、五/六段自动识别、联动说明列表、Copy/Random，双语解释与秒级执行预览 |
 
 URL JSON 使用 `{ "protocol": "https:", "host": "example.com:8080", "pathname": "/search", "query": { "q": "hello world", "tag": ["a", "b"] }, "hash": "#results" }`。只转换文本，不访问网址；query 自动编码，空格用 `+`，对象不保留不同键交错顺序，旧二元组数组仍可生成 URL。完整行为见[工具协议](docs/contracts.md#本批已确认时间结构化数据与-diff)。
 
@@ -53,7 +54,7 @@ pnpm e2e --project=chromium --grep '\[E-00\]'
 
 零匹配、失败和 focused/skipped 测试不作为通过。报告见 `test-results/`、`coverage/` 和 `playwright-report/`，均不提交；CI 保留 7 天。仅使用合成数据，不向真实 AI 发请求。
 
-本机最新验证与 Firefox 启动限制见[结构化工具验证记录](docs/verification/data-tools.md)，历史记录见[整批工具](docs/verification/builtin-tools.md)、[JSON 格式化](docs/verification/json-format.md)与[压缩](docs/verification/json-minify.md)；发布矩阵尚未全绿，CI 配置尚未远程运行。
+本机最新验证与 Firefox 启动限制见 [Cron 编辑器验证记录](docs/verification/cron-editor.md)，历史记录见 [Cron 首版](docs/verification/cron.md)、[结构化工具](docs/verification/data-tools.md)、[整批工具](docs/verification/builtin-tools.md)、[JSON 格式化](docs/verification/json-format.md)与[压缩](docs/verification/json-minify.md)；发布矩阵尚未全绿，CI 配置尚未远程运行。
 
 ## 文档
 

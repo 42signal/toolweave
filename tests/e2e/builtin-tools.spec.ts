@@ -26,7 +26,7 @@ for (const language of ["en", "zh"] as const) {
       await page.setViewportSize({ width: 375, height: 812 });
       await page.goto("/");
       await expect(
-        page.getByText(chinese ? "12 个工具" : "12 tools", { exact: true }),
+        page.getByText(chinese ? "13 个工具" : "13 tools", { exact: true }),
       ).toBeVisible();
       const vectors = [
         {

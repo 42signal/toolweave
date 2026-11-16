@@ -1,3 +1,4 @@
+import { CronInput, CronOutput } from "../CronWorkspace";
 import { DiffWorkspace } from "../DiffWorkspace";
 import type { DiffInput } from "../DiffWorkspace";
 import {
@@ -28,6 +29,11 @@ export const toolRegistrations: Partial<
   "uuid.generate": { note: "uuidNote" },
   "url.parse": { note: "urlNote" },
   "url.build": { note: "urlNote" },
+  "cron.parse": {
+    ui: { kind: "panels", Input: CronInput, Output: CronOutput },
+    execution: { kind: "live", debounceMs: 150, localized: true },
+    note: "cronNote",
+  },
   "diff.compare": {
     ui: { kind: "workspace", Workspace: DiffWorkspace },
     Controls: DiffControls,

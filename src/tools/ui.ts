@@ -44,7 +44,7 @@ export type ToolRegistration = {
   execution?:
     | { kind: "manual" }
     | { kind: "live"; debounceMs: number; localized?: boolean };
-  note?: "jwtWarning" | "uuidNote" | "urlNote" | "timeNote";
+  note?: "jwtWarning" | "uuidNote" | "urlNote" | "timeNote" | "cronNote";
   sharedInput?: {
     read: (input: string) => string;
     write: (shared: string, previous: string | undefined) => string;

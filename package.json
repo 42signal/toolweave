@@ -22,6 +22,8 @@
     "verify:release": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test:coverage && pnpm e2e"
   },
   "dependencies": {
+    "croner": "^11.0.0",
+    "cronstrue": "^3.39.0",
     "date-fns": "4.4.0",
     "diff": "9.0.0",
     "i18next": "27.1.1",

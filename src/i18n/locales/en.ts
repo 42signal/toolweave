@@ -125,6 +125,25 @@ export const en = {
         "Enter two valid objects or arrays for structured comparison, or choose Text.",
       invalidConfig: "Choose Auto, Structured, or Text comparison.",
     },
+    "cron.parse": {
+      name: "Cron Parser",
+      description:
+        "Parse and compose five-field cron or six fields with seconds.",
+      input: "Cron expression",
+      output: "Output JSON",
+      placeholder: "*/5 9-17 * * 1-5",
+      invalidInput:
+        "Enter five fields, or six with seconds first. Check field values and ranges.",
+      invalidConfig:
+        "Choose English or Simplified Chinese for the description.",
+    },
+  },
+  cronPresets: {
+    everyMinute: "Every minute",
+    hourly: "Hourly",
+    daily: "Daily",
+    weekdays: "Weekdays at 09:00",
+    monthly: "Monthly",
   },
   formats: {
     auto: "Auto",
@@ -137,6 +156,20 @@ export const en = {
     yaml: "YAML",
     structured: "Structured",
     text: "Text",
+  },
+  cronHints: {
+    cronSecond: "Second within the minute. Try 0,30 or */10.",
+    cronMinute: "Minute within the hour. Try 0,15,30,45 or */5.",
+    cronHour: "Hour in 24-hour time. Try 9-17 or */2.",
+    cronDayOfMonth: "Day within the month. Try 1,15 or 1-7.",
+    cronMonth: "Month number or JAN–DEC. Try 1,6 or MAR-SEP.",
+    cronDayOfWeek:
+      "Weekday number or SUN–SAT; 0 and 7 are Sunday. Try MON-FRI.",
+    any: "Any value in this field.",
+    list: "List: match any of the comma-separated values.",
+    range: "Range: match values between both endpoints, inclusive.",
+    step: "Step: repeat at this interval within the field's range.",
+    value: "Value: match this exact value or name.",
   },
   runner: {
     updating: "Updating preview…",
@@ -153,6 +186,29 @@ export const en = {
     uuidNote: "Generates a secure UUID v4. Input is ignored.",
     urlNote:
       "HTTP/HTTPS only · query values are strings or arrays · URL normalization applies",
+    cronNote:
+      "5 fields: minute hour day month weekday · 6 fields: seconds first · local timezone",
+    cronSecond: "Second",
+    cronFieldCount: "Cron format",
+    cronFive: "5 fields",
+    cronSix: "6 fields (seconds)",
+    cronMinute: "Minute",
+    cronHour: "Hour",
+    cronDayOfMonth: "Day of month",
+    cronMonth: "Month",
+    cronDayOfWeek: "Day of week",
+    cronDescription: "Description",
+    nextRuns: "Next runs",
+    cronPresets: "Presets",
+    cronNoRuns: "No future execution times.",
+    cronRandom: "Random",
+    cronCopy: "Copy",
+    cronCopied: "Copied",
+    cronCopyFailed:
+      "Could not copy. Select the expression and copy it manually.",
+    cronFieldHelp: "Field help",
+    cronNext: "Next",
+    cronOutputEmpty: "The schedule and next execution will appear here.",
     local: "Local execution · Web Worker",
     indent: "Indent",
     spaces_one: "{{count}} space",

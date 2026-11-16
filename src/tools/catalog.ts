@@ -123,6 +123,21 @@ export const builtinTools = [
       additionalProperties: false,
     },
   },
+  {
+    ...builtin(
+      "cron.parse",
+      "Cron Parser",
+      "Scheduling",
+      "Parse and compose five-field cron or six fields with seconds.",
+    ),
+    configSchema: {
+      type: "object",
+      properties: {
+        language: { type: "string", enum: ["en", "zh-CN"], default: "en" },
+      },
+      additionalProperties: false,
+    },
+  },
   builtin(
     "url.parse",
     "URL to JSON",

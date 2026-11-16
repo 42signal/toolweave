@@ -3,6 +3,7 @@ import { minify } from "./minify";
 import { isRecord } from "./protocol";
 import type { ToolResult } from "./protocol";
 import { decodeBase64, decodeJWT, encodeBase64 } from "./text-tools";
+import { parseCron } from "./cron";
 import { buildURL, parseURL } from "./url-tools";
 import { convertTime } from "./unix-time";
 import { compareDiff } from "./diff";
@@ -41,6 +42,7 @@ export function executeTool(request: unknown): ToolResult {
     !tool &&
     request.toolId !== "unix-time.convert" &&
     request.toolId !== "diff.compare" &&
+    request.toolId !== "cron.parse" &&
     !Object.hasOwn(textTools, request.toolId)
   ) {
     return {
@@ -65,6 +67,11 @@ export function executeTool(request: unknown): ToolResult {
     if (request.toolId === "diff.compare")
       return {
         ...compareDiff(request.input, request.config),
+        durationMs: performance.now() - startedAt,
+      };
+    if (request.toolId === "cron.parse")
+      return {
+        ...parseCron(request.input, request.config),
         durationMs: performance.now() - startedAt,
       };
     if (!isRecord(request.config) || Object.keys(request.config).length !== 0)

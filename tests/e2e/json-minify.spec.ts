@@ -4,7 +4,7 @@ for (const scenario of [
   {
     locale: "en-US",
     title: "Minify",
-    count: "12 tools",
+    count: "13 tools",
     input: "Input JSON",
     output: "Output JSON",
     indent: "Indent",
@@ -15,7 +15,7 @@ for (const scenario of [
   {
     locale: "zh-CN",
     title: "压缩",
-    count: "12 个工具",
+    count: "13 个工具",
     input: "输入 JSON",
     output: "输出 JSON",
     indent: "缩进",
